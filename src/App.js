@@ -4,28 +4,15 @@ import { useEffect, useState, useRef } from "react";
 import { DropdownContainer, getInitialSelections } from "./components/tools";
 import { CollapsibleMenu } from "./components/CollapsibleMenu";
 import { genImagePath } from "./pathUtils";
-import { Niivue } from "@niivue/niivue";
-
-const NiiVue = ({ imageUrl }) => {
-  const canvas = useRef();
-  useEffect(() => {
-    const volumeList = [
-      {
-        url: imageUrl,
-      },
-    ];
-    const nv = new Niivue();
-    nv.attachToCanvas(canvas.current);
-    nv.loadVolumes(volumeList);
-  }, [imageUrl]);
-
-  return <canvas ref={canvas} height={480} width={640} />;
-};
+import NiiVue from "./components/NiiVue";
 
 function App() {
   const [dataDict, setDataDict] = useState(null);
   const [menuOpen, setMenuOpen] = useState(false);
-  const [selections, setSelections] = useState(null);
+  const [selections, setSelections] = useState({
+    Mandatory: {},
+    Layers: {},
+  });
   const [visibleFields, setVisibleFields] = useState({
     Subjects: true,
     Sessions: true,

@@ -1,5 +1,5 @@
 import React, { useRef, useEffect } from "react";
-import Niivue from "@niivue/niivue";
+import { Niivue } from "@niivue/niivue";
 
 const NiiVue = ({ imageUrl }) => {
   const canvas = useRef();
