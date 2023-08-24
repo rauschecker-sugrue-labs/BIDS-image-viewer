@@ -2,6 +2,7 @@ import "./App.css";
 import axios from "axios";
 import { useEffect, useState, useRef } from "react";
 import { DynamicDropdowns, getInitialSelections } from "./components/tools";
+import { CollapsibleMenu } from "./components/CollapsibleMenu";
 import { genImagePath } from "./pathUtils";
 import { Niivue } from "@niivue/niivue";
 
@@ -23,7 +24,20 @@ const NiiVue = ({ imageUrl }) => {
 
 function App() {
   const [data, setData] = useState(null);
+  const [menuOpen, setMenuOpen] = useState(false);
   const [selections, setSelections] = useState(null);
+  const [visibleFields, setVisibleFields] = useState({
+    Subjects: true,
+    Sessions: true,
+    Modality: true,
+  });
+
+  const toggleFieldVisibility = (field) => {
+    setVisibleFields({
+      ...visibleFields,
+      [field]: !visibleFields[field],
+    });
+  };
 
   useEffect(() => {
     axios
@@ -60,10 +74,16 @@ function App() {
       {data ? (
         <>
           <div>
+            <CollapsibleMenu
+              menuOpen={menuOpen}
+              visibleFields={visibleFields}
+              toggleFieldVisibility={toggleFieldVisibility}
+            />
             <h1>Image Viewer</h1>
             <DynamicDropdowns
               data={data}
               selections={selections}
+              visibleFields={visibleFields}
               onSelectionChange={handleSelectionChange}
             />
           </div>

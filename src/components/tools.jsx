@@ -15,7 +15,11 @@ export const getInitialSelections = (data) => {
   }, {});
 };
 
-export const DynamicDropdowns = ({ data, onSelectionChange }) => {
+export const DynamicDropdowns = ({
+  data,
+  visibleFields,
+  onSelectionChange,
+}) => {
   const initialSelections = getInitialSelections(data);
   const [selections, setSelections] = useState(initialSelections);
   const handleChange = (key, event) => {
@@ -43,18 +47,20 @@ export const DynamicDropdowns = ({ data, onSelectionChange }) => {
 
   return (
     <div>
-      {Object.keys(data).map((key) => (
-        <div key={key}>
-          <label>{key}:</label>
-          <select
-            value={selections[key] || ""}
-            onChange={(e) => handleChange(key, e)}
-            ß
-          >
-            {renderOptions(data[key])}
-          </select>
-        </div>
-      ))}
+      {Object.keys(data).map(
+        (key) =>
+          visibleFields[key] && (
+            <div key={key}>
+              <label>{key}:</label>
+              <select
+                value={selections[key] || ""}
+                onChange={(e) => handleChange(key, e)}
+              >
+                {renderOptions(data[key])}
+              </select>
+            </div>
+          )
+      )}
     </div>
   );
 };
