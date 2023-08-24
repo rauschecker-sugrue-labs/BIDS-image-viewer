@@ -5,8 +5,13 @@ import {
   FormControlLabel,
   IconButton,
   Checkbox,
+  AppBar,
+  Toolbar,
+  CssBaseline,
+  Typography,
 } from "@mui/material";
 import MenuIcon from "@mui/icons-material/Menu";
+import { styled } from "@mui/system";
 
 export function CollapsibleMenu({ visibleFields, toggleFieldVisibility }) {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -17,9 +22,26 @@ export function CollapsibleMenu({ visibleFields, toggleFieldVisibility }) {
 
   return (
     <div>
-      <IconButton onClick={handleToggle}>
-        <MenuIcon />
-      </IconButton>
+      <CssBaseline />
+      <AppBar position="static">
+        <Toolbar>
+          <IconButton
+            edge="start"
+            color="inherit"
+            onClick={handleToggle}
+            style={
+              menuOpen
+                ? { transform: "rotate(90deg)", transition: "transform 0.3s" }
+                : { transition: "transform 0.3s" }
+            }
+          >
+            <MenuIcon />
+          </IconButton>
+          <Typography variant="h6" style={{ flexGrow: 1 }}>
+            Image Viewer
+          </Typography>
+        </Toolbar>
+      </AppBar>
       <Drawer anchor="left" open={menuOpen} onClose={handleToggle}>
         <FieldSelectionMenu
           visibleFields={visibleFields}
@@ -30,11 +52,15 @@ export function CollapsibleMenu({ visibleFields, toggleFieldVisibility }) {
   );
 }
 
+const StyledFormControlLabel = styled(FormControlLabel)`
+  margin: 8px;
+`;
+
 function FieldSelectionMenu({ visibleFields, toggleFieldVisibility }) {
   return (
-    <FormGroup>
+    <FormGroup style={{ padding: "15px" }}>
       {Object.keys(visibleFields).map((field) => (
-        <FormControlLabel
+        <StyledFormControlLabel
           key={field}
           control={<Checkbox defaultChecked={visibleFields[field]} />}
           label={field}

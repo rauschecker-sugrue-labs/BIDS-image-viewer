@@ -1,7 +1,7 @@
 import "./App.css";
 import axios from "axios";
 import { useEffect, useState, useRef } from "react";
-import { DynamicDropdowns, getInitialSelections } from "./components/tools";
+import { DropdownContainer, getInitialSelections } from "./components/tools";
 import { CollapsibleMenu } from "./components/CollapsibleMenu";
 import { genImagePath } from "./pathUtils";
 import { Niivue } from "@niivue/niivue";
@@ -79,13 +79,15 @@ function App() {
               visibleFields={visibleFields}
               toggleFieldVisibility={toggleFieldVisibility}
             />
-            <h1>Image Viewer</h1>
-            <DynamicDropdowns
+            <DropdownContainer
               data={data}
-              selections={selections}
+              // selections={selections}
               visibleFields={visibleFields}
               onSelectionChange={handleSelectionChange}
             />
+          </div>
+          <div>
+            <p></p>
           </div>
           <div>
             {imageUrl ? (
