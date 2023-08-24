@@ -1,10 +1,10 @@
-import "./App.css";
 import axios from "axios";
-import { useEffect, useState, useRef } from "react";
-import { DropdownContainer, getInitialSelections } from "./components/tools";
+import { useEffect, useRef, useState } from "react";
+import "./App.css";
 import { CollapsibleMenu } from "./components/CollapsibleMenu";
-import { genImagePath } from "./pathUtils";
 import NiiVue from "./components/NiiVue";
+import { DropdownContainer, getInitialSelections } from "./components/tools";
+import { genImagePath } from "./pathUtils";
 
 function App() {
   const [dataDict, setDataDict] = useState(null);
