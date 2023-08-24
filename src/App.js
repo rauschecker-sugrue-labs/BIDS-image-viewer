@@ -86,10 +86,7 @@ function App() {
               onSelectionChange={handleSelectionChange}
             />
           </div>
-          <div>
-            <p></p>
-          </div>
-          <div>
+          <div className="niivue-container">
             {imageUrl ? (
               <NiiVue imageUrl={imageUrl} />
             ) : (

@@ -36,3 +36,7 @@
     transform: rotate(360deg);
   }
 }
+
+.niivue-container {
+  margin: 20px;
+}
