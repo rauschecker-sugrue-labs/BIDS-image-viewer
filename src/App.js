@@ -1,23 +1,83 @@
-import logo from './logo.svg';
-import './App.css';
+import "./App.css";
+import axios from "axios";
+import { useEffect, useState, useRef } from "react";
+import { DynamicDropdowns, getInitialSelections } from "./components/tools";
+import { genImagePath } from "./pathUtils";
+import { Niivue } from "@niivue/niivue";
+
+const NiiVue = ({ imageUrl }) => {
+  const canvas = useRef();
+  useEffect(() => {
+    const volumeList = [
+      {
+        url: imageUrl,
+      },
+    ];
+    const nv = new Niivue();
+    nv.attachToCanvas(canvas.current);
+    nv.loadVolumes(volumeList);
+  }, [imageUrl]);
+
+  return <canvas ref={canvas} height={480} width={640} />;
+};
 
 function App() {
+  const [data, setData] = useState(null);
+  const [selections, setSelections] = useState(null);
+
+  useEffect(() => {
+    axios
+      .get("/data.json")
+      .then((response) => {
+        setData(response.data);
+      })
+      .catch((error) => {
+        console.error("Error fetching data:", error);
+      });
+  }, []);
+
+  useEffect(() => {
+    if (data) {
+      setSelections(getInitialSelections(data));
+    }
+  }, [data]);
+
+  const handleSelectionChange = (newSelections) => {
+    setSelections(newSelections);
+    console.log(newSelections);
+  };
+
+  var imageUrl =
+    selections &&
+    genImagePath({
+      subjectID: selections.Subjects,
+      sessionID: selections.Sessions,
+      modality: selections.Modality,
+    });
+
   return (
     <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+      {data ? (
+        <>
+          <div>
+            <h1>Image Viewer</h1>
+            <DynamicDropdowns
+              data={data}
+              selections={selections}
+              onSelectionChange={handleSelectionChange}
+            />
+          </div>
+          <div>
+            {imageUrl ? (
+              <NiiVue imageUrl={imageUrl} />
+            ) : (
+              <p style={{ color: "white" }}>Error: No image found</p>
+            )}
+          </div>
+        </>
+      ) : (
+        <p>Loading...</p>
+      )}
     </div>
   );
 }
