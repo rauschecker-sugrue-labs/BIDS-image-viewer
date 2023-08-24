@@ -5,6 +5,7 @@ import { CollapsibleMenu } from "./components/CollapsibleMenu";
 import NiiVue from "./components/NiiVue";
 import { DropdownContainer, getInitialSelections } from "./components/tools";
 import { genImagePath } from "./pathUtils";
+import default_dict from "./utils/defaults.json";
 
 function App() {
   const [dataDict, setDataDict] = useState(null);
@@ -13,11 +14,8 @@ function App() {
     Mandatory: {},
     Layers: {},
   });
-  const [visibleFields, setVisibleFields] = useState({
-    Subjects: true,
-    Sessions: true,
-    Modality: true,
-  });
+
+  const [visibleFields, setVisibleFields] = useState(default_dict.visibility);
 
   const toggleFieldVisibility = (field) => {
     setVisibleFields({
@@ -38,8 +36,8 @@ function App() {
   }, []);
 
   useEffect(() => {
-    if (dataDict) {
-      setSelections(getInitialSelections(dataDict));
+    if (dataDict && dataDict.Mandatory) {
+      setSelections(getInitialSelections(dataDict.Mandatory));
     }
   }, [dataDict]);
 
@@ -67,7 +65,13 @@ function App() {
               toggleFieldVisibility={toggleFieldVisibility}
             />
             <DropdownContainer
-              dataDict={dataDict}
+              dataDict={dataDict.Mandatory}
+              // selections={selections}
+              visibleFields={visibleFields}
+              onSelectionChange={handleSelectionChange}
+            />
+            <DropdownContainer
+              dataDict={dataDict.Layers}
               // selections={selections}
               visibleFields={visibleFields}
               onSelectionChange={handleSelectionChange}

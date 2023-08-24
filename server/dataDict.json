@@ -1,0 +1,8 @@
+{
+  "Subjects": [],
+  "Sessions": [],
+  "Modality": {
+    "DTI": ["FA", "MD", "Trace"],
+    "Structural": ["T1w", "T2w"]
+  }
+}

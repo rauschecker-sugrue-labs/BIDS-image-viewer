@@ -6,6 +6,7 @@ import {
   FormControl,
   InputLabel,
   Select,
+  MenuItem,
 } from "@mui/material";
 
 export const getInitialSelections = (dataDict) => {
@@ -80,5 +81,37 @@ export function DropdownContainer({
         </Grid>
       </Paper>
     </Container>
+  );
+}
+
+export function TractographyDropdown({
+  tractographyData,
+  selectedTractography,
+  handleTractographyChange,
+}) {
+  return (
+    <Paper
+      style={{
+        padding: "20px",
+        margin: "20px",
+        display: "flex",
+        flexDirection: "column",
+      }}
+    >
+      <FormControl variant="outlined" style={{ marginBottom: "20px" }}>
+        <InputLabel>Tractography</InputLabel>
+        <Select
+          value={selectedTractography}
+          onChange={handleTractographyChange}
+          label="Tractography"
+        >
+          {Object.keys(tractographyData).map((key) => (
+            <MenuItem key={key} value={key}>
+              {tractographyData[key]}
+            </MenuItem>
+          ))}
+        </Select>
+      </FormControl>
+    </Paper>
   );
 }

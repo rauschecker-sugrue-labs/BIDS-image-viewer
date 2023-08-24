@@ -1,0 +1,16 @@
+{
+  "visibility": {
+    "Subjects": true,
+    "Sessions": true,
+    "Modality": true,
+    "Tractography": false,
+    "Segmentations": false
+  },
+  "default_values": {
+    "Subjects": "first",
+    "Sessions": "first",
+    "Modality": "first",
+    "Tractography": null,
+    "Segmentations": null
+  }
+}
