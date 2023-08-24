@@ -8,9 +8,9 @@ import {
   Select,
 } from "@mui/material";
 
-export const getInitialSelections = (data) => {
-  return Object.keys(data).reduce((acc, key) => {
-    const value = data[key];
+export const getInitialSelections = (dataDict) => {
+  return Object.keys(dataDict).reduce((acc, key) => {
+    const value = dataDict[key];
     let firstValue;
     if (Array.isArray(value)) {
       firstValue = value[0];
@@ -22,8 +22,12 @@ export const getInitialSelections = (data) => {
   }, {});
 };
 
-export function DropdownContainer({ data, visibleFields, onSelectionChange }) {
-  const initialSelections = getInitialSelections(data);
+export function DropdownContainer({
+  dataDict,
+  visibleFields,
+  onSelectionChange,
+}) {
+  const initialSelections = getInitialSelections(dataDict);
   const [selections, setSelections] = useState(initialSelections);
   const handleChange = (key, event) => {
     const value = event.target.value;
@@ -51,7 +55,7 @@ export function DropdownContainer({ data, visibleFields, onSelectionChange }) {
     <Container>
       <Paper elevation={3} style={{ padding: "20px", marginTop: "20px" }}>
         <Grid container spacing={3}>
-          {Object.keys(data).map(
+          {Object.keys(dataDict).map(
             (key) =>
               visibleFields[key] && (
                 <Grid item xs={12} sm={6} md={4} key={key}>
@@ -67,7 +71,7 @@ export function DropdownContainer({ data, visibleFields, onSelectionChange }) {
                         id: key,
                       }}
                     >
-                      {renderOptions(data[key])}
+                      {renderOptions(dataDict[key])}
                     </Select>
                   </FormControl>
                 </Grid>
@@ -106,11 +110,11 @@ export const SubjectDropdown = ({ onSubjectChange }) => {
     // Fetch the subjects from the server
     fetch("/subjects")
       .then((response) => response.json())
-      .then((data) => {
-        setSubjects(data);
+      .then((dataDict) => {
+        setSubjects(dataDict);
         // If subjects are available, select a random subject as the default value
-        // if (data.length > 0) {
-        //   const randomSubject = data[Math.floor(Math.random() * data.length)];
+        // if (dataDict.length > 0) {
+        //   const randomSubject = dataDict[Math.floor(Math.random() * dataDict.length)];
         //   setSelectedSubject(randomSubject);
         //   onSubjectChange(randomSubject); // Call the callback with the selected subject
         // }

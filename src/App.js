@@ -23,7 +23,7 @@ const NiiVue = ({ imageUrl }) => {
 };
 
 function App() {
-  const [data, setData] = useState(null);
+  const [dataDict, setDataDict] = useState(null);
   const [menuOpen, setMenuOpen] = useState(false);
   const [selections, setSelections] = useState(null);
   const [visibleFields, setVisibleFields] = useState({
@@ -41,9 +41,9 @@ function App() {
 
   useEffect(() => {
     axios
-      .get("/data.json")
+      .get("/dataDict.json")
       .then((response) => {
-        setData(response.data);
+        setDataDict(response.data);
       })
       .catch((error) => {
         console.error("Error fetching data:", error);
@@ -51,10 +51,10 @@ function App() {
   }, []);
 
   useEffect(() => {
-    if (data) {
-      setSelections(getInitialSelections(data));
+    if (dataDict) {
+      setSelections(getInitialSelections(dataDict));
     }
-  }, [data]);
+  }, [dataDict]);
 
   const handleSelectionChange = (newSelections) => {
     setSelections(newSelections);
@@ -71,7 +71,7 @@ function App() {
 
   return (
     <div className="App">
-      {data ? (
+      {dataDict ? (
         <>
           <div>
             <CollapsibleMenu
@@ -80,7 +80,7 @@ function App() {
               toggleFieldVisibility={toggleFieldVisibility}
             />
             <DropdownContainer
-              data={data}
+              dataDict={dataDict}
               // selections={selections}
               visibleFields={visibleFields}
               onSelectionChange={handleSelectionChange}
