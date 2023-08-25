@@ -57,26 +57,27 @@ export function DropdownContainer({
       <Paper elevation={3} style={{ padding: "20px", marginTop: "20px" }}>
         <Grid container spacing={3}>
           {Object.keys(dataDict).map(
-            (key) =>
-              visibleFields[key] && (
-                <Grid item xs={12} sm={6} md={4} key={key}>
-                  <FormControl variant="outlined" fullWidth>
-                    <InputLabel htmlFor={key}>{key}</InputLabel>
-                    <Select
-                      native
-                      value={selections[key] || ""}
-                      onChange={(e) => handleChange(key, e)}
-                      label={key}
-                      inputProps={{
-                        name: key,
-                        id: key,
-                      }}
-                    >
-                      {renderOptions(dataDict[key])}
-                    </Select>
-                  </FormControl>
-                </Grid>
-              )
+            (key) => (
+              // visibleFields[key] && (
+              <Grid item xs={12} sm={6} md={4} key={key}>
+                <FormControl variant="outlined" fullWidth>
+                  <InputLabel htmlFor={key}>{key}</InputLabel>
+                  <Select
+                    native
+                    value={selections[key] || ""}
+                    onChange={(e) => handleChange(key, e)}
+                    label={key}
+                    inputProps={{
+                      name: key,
+                      id: key,
+                    }}
+                  >
+                    {renderOptions(dataDict[key])}
+                  </Select>
+                </FormControl>
+              </Grid>
+            )
+            // )
           )}
         </Grid>
       </Paper>

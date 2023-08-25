@@ -5,15 +5,21 @@ import {
   FormControlLabel,
   IconButton,
   Checkbox,
+  Button,
   AppBar,
   Toolbar,
   CssBaseline,
   Typography,
 } from "@mui/material";
 import MenuIcon from "@mui/icons-material/Menu";
+import AddIcon from "@mui/icons-material/Add";
 import { styled } from "@mui/system";
 
-export function CollapsibleMenu({ visibleFields, toggleFieldVisibility }) {
+export function CollapsibleMenu({
+  visibleFields,
+  toggleFieldVisibility,
+  onAddLayerClick,
+}) {
   const [menuOpen, setMenuOpen] = useState(false);
 
   const handleToggle = () => {
@@ -43,6 +49,15 @@ export function CollapsibleMenu({ visibleFields, toggleFieldVisibility }) {
         </Toolbar>
       </AppBar>
       <Drawer anchor="left" open={menuOpen} onClose={handleToggle}>
+        <Button
+          variant="contained"
+          color="primary"
+          onClick={onAddLayerClick}
+          style={{ margin: "10px" }}
+          endIcon={<AddIcon />}
+        >
+          Add layer
+        </Button>
         <FieldSelectionMenu
           visibleFields={visibleFields}
           toggleFieldVisibility={toggleFieldVisibility}

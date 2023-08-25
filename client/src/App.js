@@ -10,6 +10,7 @@ import default_dict from "./utils/defaults.json";
 function App() {
   const [dataDict, setDataDict] = useState(null);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [layers, setLayers] = useState([]);
   const [selections, setSelections] = useState({
     Mandatory: {},
     Layers: {},
@@ -46,6 +47,21 @@ function App() {
     console.log(newSelections);
   };
 
+  const handleAddLayerClick = () => {
+    // Step 2: Hardcode the specific dictionary for each new layer
+    const newLayer = {
+      scope: ["scope1", "s2"],
+      extension: [".trk", ".nii.gz"],
+    };
+    setLayers([...layers, newLayer]);
+  };
+
+  const handleLayerSelectionChange = (layerIndex, newSelections) => {
+    // const updatedLayers = [...layers];
+    // updatedLayers[layerIndex] = newSelections;
+    // setLayers(updatedLayers);
+  };
+
   var imageUrl =
     selections &&
     genImagePath({
@@ -63,19 +79,22 @@ function App() {
               menuOpen={menuOpen}
               visibleFields={visibleFields}
               toggleFieldVisibility={toggleFieldVisibility}
+              onAddLayerClick={handleAddLayerClick}
             />
             <DropdownContainer
               dataDict={dataDict.Mandatory}
-              // selections={selections}
               visibleFields={visibleFields}
               onSelectionChange={handleSelectionChange}
             />
-            <DropdownContainer
-              dataDict={dataDict.Layers}
-              // selections={selections}
-              visibleFields={visibleFields}
-              onSelectionChange={handleSelectionChange}
-            />
+            {layers.map((layer, index) => (
+              <DropdownContainer
+                dataDict={layer}
+                visibleFields={visibleFields}
+                onSelectionChange={(newSelections) =>
+                  handleLayerSelectionChange(index, newSelections)
+                }
+              />
+            ))}{" "}
           </div>
           <div className="niivue-container">
             {imageUrl ? (
