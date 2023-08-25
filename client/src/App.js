@@ -11,10 +11,9 @@ function App() {
   const [dataDict, setDataDict] = useState(null);
   const [menuOpen, setMenuOpen] = useState(false);
   const [layers, setLayers] = useState([]);
-  const [selections, setSelections] = useState({
-    Mandatory: {},
-    Layers: {},
-  });
+  const [selections, setSelections] = useState(null);
+  const [imageUrl, setImageUrl] = useState(null); // Add this state
+  const [imageExists, setImageExists] = useState(false);
 
   const [visibleFields, setVisibleFields] = useState(default_dict.visibility);
 
@@ -37,8 +36,26 @@ function App() {
   }, []);
 
   useEffect(() => {
-    if (dataDict && dataDict.Mandatory) {
-      setSelections(getInitialSelections(dataDict.Mandatory));
+    console.log("Get imageUrl from selections");
+    if (selections) {
+      axios
+        .post("/get-image-path", selections)
+        .then((response) => {
+          console.log(`Image exists response: ${response.data.exists}`);
+          setImageExists(response.data.exists);
+          if (response.data.exists) {
+            setImageUrl(response.data.path); // Set the image URL in state
+          }
+        })
+        .catch((error) => {
+          console.error("Error checking image:", error);
+        });
+    }
+  }, [selections]);
+
+  useEffect(() => {
+    if (dataDict && dataDict) {
+      setSelections(getInitialSelections(dataDict));
     }
   }, [dataDict]);
 
@@ -62,14 +79,6 @@ function App() {
     // setLayers(updatedLayers);
   };
 
-  var imageUrl =
-    selections &&
-    genImagePath({
-      subjectID: selections.Subjects,
-      sessionID: selections.Sessions,
-      modality: selections.Modality,
-    });
-
   return (
     <div className="App">
       {dataDict ? (
@@ -82,7 +91,7 @@ function App() {
               onAddLayerClick={handleAddLayerClick}
             />
             <DropdownContainer
-              dataDict={dataDict.Mandatory}
+              dataDict={dataDict}
               visibleFields={visibleFields}
               onSelectionChange={handleSelectionChange}
             />
