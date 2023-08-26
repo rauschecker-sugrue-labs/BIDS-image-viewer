@@ -15,11 +15,7 @@ import MenuIcon from "@mui/icons-material/Menu";
 import AddIcon from "@mui/icons-material/Add";
 import { styled } from "@mui/system";
 
-export function CollapsibleMenu({
-  visibleFields,
-  toggleFieldVisibility,
-  onAddLayerClick,
-}) {
+export function CollapsibleMenu({ onAddLayerClick }) {
   const [menuOpen, setMenuOpen] = useState(false);
 
   const handleToggle = () => {
@@ -58,10 +54,6 @@ export function CollapsibleMenu({
         >
           Add layer
         </Button>
-        <FieldSelectionMenu
-          visibleFields={visibleFields}
-          toggleFieldVisibility={toggleFieldVisibility}
-        />
       </Drawer>
     </div>
   );
@@ -70,18 +62,3 @@ export function CollapsibleMenu({
 const StyledFormControlLabel = styled(FormControlLabel)`
   margin: 8px;
 `;
-
-function FieldSelectionMenu({ visibleFields, toggleFieldVisibility }) {
-  return (
-    <FormGroup style={{ padding: "15px" }}>
-      {Object.keys(visibleFields).map((field) => (
-        <StyledFormControlLabel
-          key={field}
-          control={<Checkbox defaultChecked={visibleFields[field]} />}
-          label={field}
-          onClick={() => toggleFieldVisibility(field)}
-        />
-      ))}
-    </FormGroup>
-  );
-}

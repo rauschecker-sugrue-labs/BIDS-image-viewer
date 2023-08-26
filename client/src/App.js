@@ -4,8 +4,6 @@ import "./App.css";
 import { CollapsibleMenu } from "./components/CollapsibleMenu";
 import NiiVue from "./components/NiiVue";
 import { DropdownContainer, getInitialSelections } from "./components/tools";
-import { genImagePath } from "./pathUtils";
-import default_dict from "./utils/defaults.json";
 
 function App() {
   const [dataDict, setDataDict] = useState(null);
@@ -14,8 +12,6 @@ function App() {
   const [selections, setSelections] = useState(null);
   const [imageUrl, setImageUrl] = useState(null); // Add this state
   const [imageExists, setImageExists] = useState(false);
-
-  const [visibleFields, setVisibleFields] = useState(default_dict.visibility);
   const [ids, setIds] = useState({ subject: [], session: [] });
 
   useEffect(() => {
@@ -31,13 +27,6 @@ function App() {
         console.error("There was an error fetching data: ", error);
       });
   }, []);
-
-  const toggleFieldVisibility = (field) => {
-    setVisibleFields({
-      ...visibleFields,
-      [field]: !visibleFields[field],
-    });
-  };
 
   useEffect(() => {
     axios
@@ -101,8 +90,6 @@ function App() {
           <div>
             <CollapsibleMenu
               menuOpen={menuOpen}
-              visibleFields={visibleFields}
-              toggleFieldVisibility={toggleFieldVisibility}
               onAddLayerClick={handleAddLayerClick}
             />
             <DropdownContainer dataDict={ids} onSelectionChange={null} />
