@@ -23,11 +23,7 @@ export const getInitialSelections = (dataDict) => {
   }, {});
 };
 
-export function DropdownContainer({
-  dataDict,
-  visibleFields,
-  onSelectionChange,
-}) {
+export function DropdownContainer({ dataDict, onSelectionChange }) {
   const initialSelections = getInitialSelections(dataDict);
   const [selections, setSelections] = useState(initialSelections);
   const handleChange = (key, event) => {

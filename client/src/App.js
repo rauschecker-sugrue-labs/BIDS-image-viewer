@@ -69,7 +69,7 @@ function App() {
   }, [selections]);
 
   useEffect(() => {
-    if (dataDict && dataDict) {
+    if (dataDict) {
       setSelections(getInitialSelections(dataDict));
     }
   }, [dataDict]);
@@ -108,13 +108,11 @@ function App() {
             <DropdownContainer dataDict={ids} onSelectionChange={null} />
             <DropdownContainer
               dataDict={dataDict}
-              visibleFields={visibleFields}
               onSelectionChange={handleSelectionChange}
             />
             {layers.map((layer, index) => (
               <DropdownContainer
                 dataDict={layer}
-                visibleFields={visibleFields}
                 onSelectionChange={(newSelections) =>
                   handleLayerSelectionChange(index, newSelections)
                 }
