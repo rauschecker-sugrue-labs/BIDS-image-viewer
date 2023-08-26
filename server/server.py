@@ -40,6 +40,11 @@ def get_subjects():
     subjects = [d.name for d in subjects_dir.iterdir() if d.is_dir()]
     return jsonify(subjects)
 
+@app.route('/get-subjects-sessions')
+def get_subjects_sessions():
+    
+    return jsonify({"subject": LAYOUT.get_subjects(), "session": LAYOUT.get_sessions()})
+
 @app.route('/get-image-path', methods=['POST'])
 def get_image_path():
     data = request.json

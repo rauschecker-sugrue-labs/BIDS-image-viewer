@@ -16,6 +16,21 @@ function App() {
   const [imageExists, setImageExists] = useState(false);
 
   const [visibleFields, setVisibleFields] = useState(default_dict.visibility);
+  const [ids, setIds] = useState({ subject: [], session: [] });
+
+  useEffect(() => {
+    axios
+      .get("/get-subjects-sessions")
+      .then((response) => {
+        setIds({
+          subject: response.data.subject,
+          session: response.data.session,
+        });
+      })
+      .catch((error) => {
+        console.error("There was an error fetching data: ", error);
+      });
+  }, []);
 
   const toggleFieldVisibility = (field) => {
     setVisibleFields({
@@ -90,6 +105,7 @@ function App() {
               toggleFieldVisibility={toggleFieldVisibility}
               onAddLayerClick={handleAddLayerClick}
             />
+            <DropdownContainer dataDict={ids} onSelectionChange={null} />
             <DropdownContainer
               dataDict={dataDict}
               visibleFields={visibleFields}
