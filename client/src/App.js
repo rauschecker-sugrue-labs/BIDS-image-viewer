@@ -6,12 +6,9 @@ import NiiVue from "./components/NiiVue";
 import { DropdownContainer, getInitialSelections } from "./components/tools";
 
 function App() {
-  const [dataDict, setDataDict] = useState(null);
   const [menuOpen, setMenuOpen] = useState(false);
   const [layers, setLayers] = useState([]);
-  const [selections, setSelections] = useState(null);
   const [imageUrl, setImageUrl] = useState(null); // Add this state
-  const [imageExists, setImageExists] = useState(false);
   const [ids, setIds] = useState({});
   const [globalId, setGlobalId] = useState({ subject: null, session: null });
 
@@ -30,64 +27,96 @@ function App() {
       });
   }, []);
 
-  useEffect(() => {
-    axios
-      .get("/dataDict.json")
-      .then((response) => {
-        setDataDict(response.data);
-      })
-      .catch((error) => {
-        console.error("Error fetching data:", error);
-      });
-  }, []);
-
-  useEffect(() => {
-    console.log("Get imageUrl from selections");
-    if (selections) {
-      axios
-        .post("/get-image-path", selections)
-        .then((response) => {
-          console.log(`Image exists response: ${response.data.exists}`);
-          setImageExists(response.data.exists);
+  // Function to check for valid path
+  const getValidPath = async (params) => {
+    try {
+      const response = await axios.post("/get-image-path", params);
+      console.debug("getValidPath response");
+      console.debug(response.data);
           if (response.data.exists) {
-            setImageUrl(response.data.path); // Set the image URL in state
+        // You have a valid path. Update the NiiVue component.
+        setImageUrl(response.data.path);
+      } else {
+        // Parameters did not form a valid path. Handle accordingly.
+        console.log("Not a valid path:");
+      }
+    } catch (error) {
+      console.error("Error:", error);
           }
-        })
-        .catch((error) => {
-          console.error("Error checking image:", error);
-        });
-    }
-  }, [selections]);
+  };
 
+  const fetchData = async () => {
+    try {
+      const response = await axios.get("/get-fields");
+      const newLayer = response.data;
+      setLayers([newLayer]);
+    } catch (error) {
+      console.error("There was an error fetching the default layer:", error);
+    }
+  };
+
+  // This useEffect will run when the component mounts
   useEffect(() => {
-    if (dataDict) {
-      setSelections(getInitialSelections(dataDict));
+    fetchData();
+  }, []); // Empty dependency array means this runs once when the component mounts
+
+  const handleAddLayerClick = async () => {
+    try {
+      const response = await axios.get("/get-fields"); // replace with your server endpoint if different
+      const newLayer = response.data; // assuming server returns the desired object format
+      setLayers([...layers, newLayer]);
+    } catch (error) {
+      console.error("There was an error adding a new layer:", error);
     }
-  }, [dataDict]);
-
-  const handleSelectionChange = (newSelections) => {
-    setSelections(newSelections);
-    console.log(newSelections);
   };
 
-  const handleAddLayerClick = () => {
-    // Step 2: Hardcode the specific dictionary for each new layer
-    const newLayer = {
-      scope: ["scope1", "s2"],
-      extension: [".trk", ".nii.gz"],
-    };
-    setLayers([...layers, newLayer]);
-  };
-  const handleGlobalChange = (newIds) => {
+  const handleGlobalChange = async (newIds) => {
     setGlobalId(newIds);
-    // TODO
-    // fetchNewOptionsForAllLayers(newIds);
+    // Assume we need to update only the first layer for simplicity
+    // In a real-world application, you might loop through all layers
+    const layer = layers[0]; // Replace with loop if updating multiple layers
+
+    // Merge global IDs and selections for the layer
+    const updatedSelections = { ...newIds, ...layer };
+
+    // Check if this forms a valid path
+    getValidPath(updatedSelections);
   };
-  // Handler for layer-specific changes
-  const handleLayerSelectionChange = (layerIndex, newSelections) => {
-    // const updatedLayers = [...layers];
-    // updatedLayers[layerIndex] = newSelections;
-    // setLayers(updatedLayers);
+
+  const handleLayerSelectionChange = async (layerIndex, newSelections) => {
+    try {
+      // Filter only the keys that have non-empty values
+      const filteredSelections = Object.fromEntries(
+        Object.entries(newSelections)
+          .map(([key, value]) => {
+            if (typeof value === "string" && value !== "") {
+              return [key, value];
+            } else if (Array.isArray(value)) {
+              if (value.length === 1) {
+                return [key, value[0]];
+              }
+            }
+            return null;
+          })
+          .filter((item) => item !== null)
+      );
+      console.debug("filteredSelections");
+      console.debug(filteredSelections);
+      const response = await axios.post("/update-fields", filteredSelections);
+      const updatedLayer = response.data;
+      // Only update if there are changes
+      if (JSON.stringify(layers[layerIndex]) !== JSON.stringify(updatedLayer)) {
+        const updatedLayers = [...layers];
+        updatedLayers[layerIndex] = updatedLayer;
+        setLayers(updatedLayers);
+        // Try to get path for that layer
+        console.debug({ ...globalId, ...filteredSelections });
+        console.debug("getValidPath");
+        console.debug(getValidPath({ ...globalId, ...filteredSelections }));
+      }
+    } catch (error) {
+      console.error("There was an error updating the layer:", error);
+    }
   };
 
   return (
@@ -103,13 +132,6 @@ function App() {
             dataDict={ids}
             onSelectionChange={handleGlobalChange}
           />
-          <p>
-            Test: subject: {globalId.subject}, session: {globalId.session}
-          </p>
-          {/* <DropdownContainer
-              dataDict={dataDict}
-              onSelectionChange={handleSelectionChange}
-          /> */}
             {layers.map((layer, index) => (
               <DropdownContainer
                 dataDict={layer}

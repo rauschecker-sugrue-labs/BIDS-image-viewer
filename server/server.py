@@ -50,16 +50,22 @@ def get_subjects_sessions():
 @app.route('/get-image-path', methods=['POST'])
 def get_image_path():
     data = request.json
-    data['extension'] = 'nii.gz'
     # Build the path using pyBIDS and check if the image exists
     image_path = fh.get_fp(LAYOUT, data)
     exists = image_path is not None
+    print(f"Image exists: {exists} at {image_path}")
     return jsonify({'exists': exists, 'path': str(image_path) if exists else None})
 
 @app.route('/get-fields')
 def get_fields():
     fields = fh.parse_bids_data_attributes(LAYOUT)
     return jsonify(fields)
+
+@app.route('/update-fields', methods=['POST'])
+def update_fields():
+    data = request.json
+    updated_fields = fh.parse_bids_data_attributes(LAYOUT, data)
+    return jsonify(updated_fields)
 
 @app.route('/<path:file_path>', methods=['GET'])
 def get_file(file_path):

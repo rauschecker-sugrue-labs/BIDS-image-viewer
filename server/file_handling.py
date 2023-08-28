@@ -29,7 +29,6 @@ def get_fp(layout:BIDSLayout, kwargs:dict):
     if len(fp) == 0:
         UserWarning(Exception("No file found"))
         return None
-    print(fp)
     return Path(fp[0]).relative_to(root_dir)
 
 def parse_bids_data_attributes(layout:BIDSLayout, kwargs:dict={}):
@@ -67,6 +66,14 @@ def parse_bids_data_attributes(layout:BIDSLayout, kwargs:dict={}):
     result_dict['suffix'] = suffix
     result_dict['extension'] = extensions
     result_dict['scope'] = scopes
-    result_dict = {k: list(v) for k, v in result_dict.items() if len(v)>1}
+    result_dict = {k: list(v) for k, v in result_dict.items()}
+    # Check that all keys are valid
+    to_drop = []
+    for key, value in result_dict.items():
+        try:
+            layout.get(**{key:value[0]})
+        except ValueError:
+            to_drop.append(key)
+    result_dict = {k: v for k, v in result_dict.items() if k not in to_drop}
     return result_dict
 
