@@ -12,9 +12,11 @@ function App() {
   const [selections, setSelections] = useState(null);
   const [imageUrl, setImageUrl] = useState(null); // Add this state
   const [imageExists, setImageExists] = useState(false);
-  const [ids, setIds] = useState({ subject: [], session: [] });
+  const [ids, setIds] = useState({});
+  const [globalId, setGlobalId] = useState({ subject: null, session: null });
 
   useEffect(() => {
+    console.debug("Fetching subjects and sessions");
     axios
       .get("/get-subjects-sessions")
       .then((response) => {
@@ -76,7 +78,12 @@ function App() {
     };
     setLayers([...layers, newLayer]);
   };
-
+  const handleGlobalChange = (newIds) => {
+    setGlobalId(newIds);
+    // TODO
+    // fetchNewOptionsForAllLayers(newIds);
+  };
+  // Handler for layer-specific changes
   const handleLayerSelectionChange = (layerIndex, newSelections) => {
     // const updatedLayers = [...layers];
     // updatedLayers[layerIndex] = newSelections;
@@ -85,18 +92,24 @@ function App() {
 
   return (
     <div className="App">
-      {dataDict ? (
+      {ids ? ( //FIXME: this seems to always be true
         <>
           <div>
             <CollapsibleMenu
               menuOpen={menuOpen}
               onAddLayerClick={handleAddLayerClick}
             />
-            <DropdownContainer dataDict={ids} onSelectionChange={null} />
             <DropdownContainer
+            dataDict={ids}
+            onSelectionChange={handleGlobalChange}
+          />
+          <p>
+            Test: subject: {globalId.subject}, session: {globalId.session}
+          </p>
+          {/* <DropdownContainer
               dataDict={dataDict}
               onSelectionChange={handleSelectionChange}
-            />
+          /> */}
             {layers.map((layer, index) => (
               <DropdownContainer
                 dataDict={layer}

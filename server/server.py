@@ -9,6 +9,9 @@ app.config.from_object(Config)
 
 ROOTDIR = app.config['ROOTDIR']
 port = app.config['PORT']
+# Call this on server launch
+LAYOUT = fh.get_layout(ROOTDIR)
+
 
 def update_subjects_and_sessions():
     derivatives_path = ROOTDIR / "derivatives/mproc"
@@ -42,7 +45,6 @@ def get_subjects():
 
 @app.route('/get-subjects-sessions')
 def get_subjects_sessions():
-    
     return jsonify({"subject": LAYOUT.get_subjects(), "session": LAYOUT.get_sessions()})
 
 @app.route('/get-image-path', methods=['POST'])
@@ -64,12 +66,5 @@ def get_file(file_path):
 
 # You can add the route to get available files similar to what we discussed earlier
 
-# Call this function on server launch
-def on_start():
-    update_subjects_and_sessions()
-    LAYOUT = fh.get_layout(ROOTDIR)
-    return LAYOUT
-
 if __name__ == '__main__':
-    LAYOUT = on_start()
     app.run(port=port, debug=True)
