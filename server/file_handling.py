@@ -18,11 +18,19 @@ def get_layout(root_dir: Path) -> BIDSLayout:
 def get_fp(layout:BIDSLayout, kwargs:dict):
     """Get the filepath of the image of interest based on series of bids arguments
     """
+    if 'algo' in kwargs.keys() and len(kwargs['algo']) == 1:
+        check_algo = True
+        algo = kwargs.pop('algo')
+        algo = algo[0]
+    else:
+        check_algo = False
     try: 
         fp = layout.get(return_type='filename', **kwargs)
     except FileNotFoundError:
         UserWarning(FileNotFoundError("No file found"))
         return None
+    if check_algo:
+        fp = [m for m in fp if algo in m]
     if len(fp) > 1:
         UserWarning(Exception("More than one file found, please specify more"))
         return None
@@ -40,6 +48,9 @@ def parse_bids_data_attributes(layout:BIDSLayout, kwargs:dict={}):
         parse_bids_data_attributes(layout, {'suffix':'T1w'})
         ```
     """
+    if 'algo' in kwargs.keys():
+        check_algo = True
+        algo = kwargs.pop('algo')
     all_files = layout.get(return_type='filename', **kwargs) #TODO perform tests on the server with 10000 subjects...
     exclude = ['json', 'xform', 'csv', 'bval', 'bvec']
 
@@ -70,6 +81,8 @@ def parse_bids_data_attributes(layout:BIDSLayout, kwargs:dict={}):
     # Check that all keys are valid
     to_drop = []
     for key, value in result_dict.items():
+        if key == 'algo':
+            continue
         try:
             layout.get(**{key:value[0]})
         except ValueError:
