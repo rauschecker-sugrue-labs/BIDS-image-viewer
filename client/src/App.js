@@ -8,7 +8,7 @@ import { DropdownContainer, getInitialSelections } from "./components/tools";
 function App() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [layers, setLayers] = useState([]);
-  const [imageUrl, setImageUrl] = useState(null); // Add this state
+  const [imageUrls, setImageUrls] = useState([]);
   const [ids, setIds] = useState({});
   const [globalId, setGlobalId] = useState({ subject: null, session: null });
 
@@ -28,17 +28,13 @@ function App() {
   }, []);
 
   // Function to check for valid path
-  const getValidPath = async (params) => {
+  const getValidPath = async (params, layerIndex) => {
     try {
       const response = await axios.post("/get-image-path", params);
-      console.debug("getValidPath response");
-      console.debug(response.data);
           if (response.data.exists) {
-        // You have a valid path. Update the NiiVue component.
-        setImageUrl(response.data.path);
-      } else {
-        // Parameters did not form a valid path. Handle accordingly.
-        console.log("Not a valid path:");
+        const newImageUrls = [...imageUrls];
+        newImageUrls[layerIndex] = response.data.path;
+        setImageUrls(newImageUrls);
       }
     } catch (error) {
       console.error("Error:", error);
@@ -62,9 +58,10 @@ function App() {
 
   const handleAddLayerClick = async () => {
     try {
-      const response = await axios.get("/get-fields"); // replace with your server endpoint if different
-      const newLayer = response.data; // assuming server returns the desired object format
+      const response = await axios.get("/get-fields");
+      const newLayer = response.data;
       setLayers([...layers, newLayer]);
+      setImageUrls([...imageUrls, null]); // Initialize imageUrl for the new layer to null
     } catch (error) {
       console.error("There was an error adding a new layer:", error);
     }
@@ -72,15 +69,12 @@ function App() {
 
   const handleGlobalChange = async (newIds) => {
     setGlobalId(newIds);
-    // Assume we need to update only the first layer for simplicity
-    // In a real-world application, you might loop through all layers
-    const layer = layers[0]; // Replace with loop if updating multiple layers
-
+    for (let layerIndex = 0; layerIndex < layers.length; layerIndex++) {
+      const layer = layers[layerIndex];
     // Merge global IDs and selections for the layer
     const updatedSelections = { ...newIds, ...layer };
-
-    // Check if this forms a valid path
-    getValidPath(updatedSelections);
+      await getValidPath(updatedSelections, layerIndex);
+    }
   };
 
   const handleLayerSelectionChange = async (layerIndex, newSelections) => {
@@ -113,6 +107,8 @@ function App() {
         console.debug({ ...globalId, ...filteredSelections });
         console.debug("getValidPath");
         console.debug(getValidPath({ ...globalId, ...filteredSelections }));
+        const updatedSelections = { ...globalId, ...updatedLayer };
+        await getValidPath(updatedSelections, layerIndex);
       }
     } catch (error) {
       console.error("There was an error updating the layer:", error);

@@ -45,32 +45,36 @@ export function DropdownContainer({ dataDict, onSelectionChange }) {
   };
 
   useEffect(() => {
-    setSelections(dataDict);
-  }, [dataDict]);
+    const emptySelections = Object.keys(dataDict).reduce((acc, key) => {
+      return { ...acc, [key]: "" };
+    }, {});
+    setSelections(emptySelections);
+  }, []);
+  //  const customOrder = ["suffix", "extension", "scope", "description"];
 
   return (
     <Container>
       <Paper elevation={3} style={{ padding: "20px", marginTop: "20px" }}>
         <Grid container spacing={3}>
           {Object.keys(dataDict).map((key) => (
-              <Grid item xs={12} sm={6} md={4} key={key}>
-                <FormControl variant="outlined" fullWidth>
-                  <InputLabel htmlFor={key}>{key}</InputLabel>
-                  <Select
-                    native
-                    value={selections[key] || ""}
-                    onChange={(e) => handleChange(key, e)}
-                    label={key}
-                    inputProps={{
-                      name: key,
-                      id: key,
-                    }}
-                  >
+            <Grid item xs={6} sm={3} md={6} key={key}>
+              <FormControl variant="outlined" fullWidth>
+                <InputLabel htmlFor={key}>{key}</InputLabel>
+                <Select
+                  native
+                  value={selections[key] || ""}
+                  onChange={(e) => handleChange(key, e)}
+                  label={key}
+                  inputProps={{
+                    name: key,
+                    id: key,
+                  }}
+                >
                   <option aria-label="None" value="" />
-                    {renderOptions(dataDict[key])}
-                  </Select>
-                </FormControl>
-              </Grid>
+                  {renderOptions(dataDict[key])}
+                </Select>
+              </FormControl>
+            </Grid>
           ))}
         </Grid>
         <Button
@@ -85,3 +89,9 @@ export function DropdownContainer({ dataDict, onSelectionChange }) {
     </Container>
   );
 }
+
+export const getInitialSelections = (dataDict) => {
+  return Object.keys(dataDict).reduce((acc, key) => {
+    return { ...acc, [key]: "" };
+  }, {});
+};
