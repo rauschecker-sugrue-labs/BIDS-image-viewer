@@ -56,6 +56,11 @@ def get_image_path():
     exists = image_path is not None
     return jsonify({'exists': exists, 'path': str(image_path) if exists else None})
 
+@app.route('/get-fields')
+def get_fields():
+    fields = fh.parse_bids_data_attributes(LAYOUT)
+    return jsonify(fields)
+
 @app.route('/<path:file_path>', methods=['GET'])
 def get_file(file_path):
     file_path = ROOTDIR / file_path
