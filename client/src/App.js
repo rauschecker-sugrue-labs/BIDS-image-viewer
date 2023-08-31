@@ -1,16 +1,43 @@
 import axios from "axios";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import "./App.css";
 import { CollapsibleMenu } from "./components/CollapsibleMenu";
-import NiiVue from "./components/NiiVue";
 import { DropdownContainer, getInitialSelections } from "./components/tools";
+import { Niivue } from "@niivue/niivue";
+
+const NiiVue = ({ volumeList, meshList }) => {
+  const canvas = useRef();
+  useEffect(() => {
+    const loadResourcesAndSetSliceType = async () => {
+      const nv = new Niivue();
+      nv.attachToCanvas(canvas.current);
+      nv.loadVolumes(volumeList);
+      await nv.loadMeshes(meshList); // Await completion before moving on
+      nv.setSliceType(nv.sliceTypeMultiplanar);
+    };
+
+    loadResourcesAndSetSliceType();
+  }, [volumeList, meshList]);
+
+  return <canvas ref={canvas} height={480} width={640} />;
+};
 
 function App() {
+  useEffect(() => {
+    document.title = "BIDS Image Visualizer";
+  }, []);
+
   const [menuOpen, setMenuOpen] = useState(false);
   const [layers, setLayers] = useState([]);
-  const [imageUrl, setImageUrl] = useState(null); // Add this state
+  const [imageUrls, setImageUrls] = useState([]);
+  const [volumeList, setVolumeList] = useState([]);
+  const [meshList, setMeshList] = useState([]);
   const [ids, setIds] = useState({});
   const [globalId, setGlobalId] = useState({ subject: null, session: null });
+  const supportedExt = {
+    volume: ["nii.gz", ".nii.gz", ".nii", ".gz"],
+    mesh: [".trk", ".trx"],
+  };
 
   useEffect(() => {
     console.debug("Fetching subjects and sessions");
@@ -28,17 +55,13 @@ function App() {
   }, []);
 
   // Function to check for valid path
-  const getValidPath = async (params) => {
+  const getValidPath = async (params, layerIndex) => {
     try {
       const response = await axios.post("/get-image-path", params);
-      console.debug("getValidPath response");
-      console.debug(response.data);
           if (response.data.exists) {
-        // You have a valid path. Update the NiiVue component.
-        setImageUrl(response.data.path);
-      } else {
-        // Parameters did not form a valid path. Handle accordingly.
-        console.log("Not a valid path:");
+        const newImageUrls = [...imageUrls];
+        newImageUrls[layerIndex] = response.data.path;
+        setImageUrls(newImageUrls);
       }
     } catch (error) {
       console.error("Error:", error);
@@ -48,8 +71,8 @@ function App() {
   const fetchData = async () => {
     try {
       const response = await axios.get("/get-fields");
-      const newLayer = response.data;
-      setLayers([newLayer]);
+      const bidsEntities = response.data;
+      setLayers([bidsEntities]);
     } catch (error) {
       console.error("There was an error fetching the default layer:", error);
     }
@@ -58,13 +81,13 @@ function App() {
   // This useEffect will run when the component mounts
   useEffect(() => {
     fetchData();
-  }, []); // Empty dependency array means this runs once when the component mounts
+  }, []);
 
   const handleAddLayerClick = async () => {
     try {
-      const response = await axios.get("/get-fields"); // replace with your server endpoint if different
-      const newLayer = response.data; // assuming server returns the desired object format
-      setLayers([...layers, newLayer]);
+      const response = await axios.get("/get-fields");
+      const bidsEntities = response.data;
+      setLayers([...layers, bidsEntities]);
     } catch (error) {
       console.error("There was an error adding a new layer:", error);
     }
@@ -72,15 +95,12 @@ function App() {
 
   const handleGlobalChange = async (newIds) => {
     setGlobalId(newIds);
-    // Assume we need to update only the first layer for simplicity
-    // In a real-world application, you might loop through all layers
-    const layer = layers[0]; // Replace with loop if updating multiple layers
-
+    for (let layerIndex = 0; layerIndex < layers.length; layerIndex++) {
+      const layer = layers[layerIndex];
     // Merge global IDs and selections for the layer
     const updatedSelections = { ...newIds, ...layer };
-
-    // Check if this forms a valid path
-    getValidPath(updatedSelections);
+      await getValidPath(updatedSelections, layerIndex);
+    }
   };
 
   const handleLayerSelectionChange = async (layerIndex, newSelections) => {
@@ -113,15 +133,56 @@ function App() {
         console.debug({ ...globalId, ...filteredSelections });
         console.debug("getValidPath");
         console.debug(getValidPath({ ...globalId, ...filteredSelections }));
+        const updatedSelections = { ...globalId, ...updatedLayer };
+        await getValidPath(updatedSelections, layerIndex);
       }
     } catch (error) {
       console.error("There was an error updating the layer:", error);
     }
   };
+  const handleDeleteLayer = (layerIndex) => {
+    const newLayers = [...layers];
+    newLayers.splice(layerIndex, 1);
+    setLayers(newLayers);
+
+    const newImageUrls = [...imageUrls];
+    newImageUrls.splice(layerIndex, 1);
+    setImageUrls(newImageUrls);
+  };
+  useEffect(() => {
+    console.log("imageUrls updated:", imageUrls);
+    const newVolumeList = [];
+    const newMeshList = [];
+
+    imageUrls.forEach((url, index) => {
+      const ext = url.substring(url.lastIndexOf(".")); // Get the file extension
+      const fullExt = url.split(".").slice(-2).join("."); // Get the full extension for cases like '.nii.gz'
+      console.debug("ext: ", ext);
+      console.debug("fullext: ", fullExt);
+      // console.debug("fullext: ", fullext);
+      if (
+        supportedExt.volume.includes(ext) ||
+        supportedExt.volume.includes(fullExt)
+      ) {
+        newVolumeList.push({ url });
+      } else if (
+        supportedExt.mesh.includes(ext) ||
+        supportedExt.mesh.includes(fullExt)
+      ) {
+        newMeshList.push({ url });
+      }
+    });
+
+    setVolumeList(newVolumeList);
+    setMeshList(newMeshList);
+    console.log("volumes updated: ", newVolumeList);
+    console.log("meshes updated: ", newMeshList);
+    console.log(layers);
+  }, [imageUrls]);
 
   return (
     <div className="App">
-      {ids ? ( //FIXME: this seems to always be true
+      {ids ? (
         <>
           <div>
             <CollapsibleMenu
@@ -131,21 +192,33 @@ function App() {
             <DropdownContainer
             dataDict={ids}
             onSelectionChange={handleGlobalChange}
+              isDeletable={false}
           />
             {layers.map((layer, index) => (
               <DropdownContainer
+                key={index}
                 dataDict={layer}
                 onSelectionChange={(newSelections) =>
                   handleLayerSelectionChange(index, newSelections)
                 }
+                onDelete={() => handleDeleteLayer(index)}
+                isDeletable={true}
               />
-            ))}{" "}
+            ))}
           </div>
           <div className="niivue-container">
-            {imageUrl ? (
-              <NiiVue imageUrl={imageUrl} />
+            {volumeList.length > 0 || meshList.length > 0 ? (
+              <NiiVue volumeList={volumeList} meshList={meshList} />
             ) : (
-              <p style={{ color: "white" }}>Error: No image found</p>
+              <p
+                style={{
+                  backgroundColor: "white",
+                  color: "black",
+                  fontStyle: "oblique",
+                }}
+              >
+                Choose an image to load...
+              </p>
             )}
           </div>
         </>

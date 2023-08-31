@@ -1,31 +1,39 @@
 #%%
 from pathlib import Path
-from bids.layout import BIDSLayout
+from bids.layout import BIDSLayout, add_config_paths, Config, Entity
 import numpy as np
 from collections import defaultdict
 
+root_dir = Path("/Users/pierre/Documents/code/viewer-app/data/abcd2")
 # %%
-root_dir = Path('/Users/pierre/Documents/code/viewer-app/data/abcd2')
 # save time and only load a few subjects
 # BIDSLayout(bids_dir, ignore=[re.compile(r"(sub-(?!25)\d*/)")])
+
 
 def get_layout(root_dir: Path) -> BIDSLayout:
     """
     Get the layout of the data
     """
-    return BIDSLayout(root_dir, derivatives=True)
+    return BIDSLayout(
+        root_dir,
+        derivatives=True,
+        config=[
+            "bids",
+            "/Users/pierre/Documents/code/viewer-app/my-app/server/bids.json",
+        ],
+    )
 
-def get_fp(layout:BIDSLayout, kwargs:dict):
-    """Get the filepath of the image of interest based on series of bids arguments
-    """
-    if 'algo' in kwargs.keys() and len(kwargs['algo']) == 1:
+
+def get_fp(layout: BIDSLayout, kwargs: dict):
+    """Get the filepath of the image of interest based on series of bids arguments"""
+    if "algo" in kwargs.keys() and len(kwargs["algo"]) == 1:
         check_algo = True
-        algo = kwargs.pop('algo')
+        algo = kwargs.pop("algo")
         algo = algo[0]
     else:
         check_algo = False
-    try: 
-        fp = layout.get(return_type='filename', **kwargs)
+    try:
+        fp = layout.get(return_type="filename", **kwargs)
     except FileNotFoundError:
         UserWarning(FileNotFoundError("No file found"))
         return None
@@ -39,7 +47,19 @@ def get_fp(layout:BIDSLayout, kwargs:dict):
         return None
     return Path(fp[0]).relative_to(root_dir)
 
-def parse_bids_data_attributes(layout:BIDSLayout, kwargs:dict={}):
+
+
+def get_choices(layout: BIDSLayout, kwargs: dict, exclude: list):
+    """Get the list of choices for a given layout and kwargs under dict format"""
+    files = layout.get(return_type="filename", **kwargs)
+    files = [Path(m).relative_to(root_dir) for m in files]
+    files = [fp.name.split("run-01_")[1].split(".nii.gz")[0] for fp in files]
+    files = np.unique(files)
+    files = [m for m in files if not any([e in m for e in exclude])]
+    return [create_dict(m) for m in files]
+
+
+def parse_bids_data_attributes(layout: BIDSLayout, kwargs: dict = {}):
     """Parse the bids data attributes and return a dictionary of possible choices
     
     Examples: 
