@@ -47,7 +47,9 @@ def get_subjects():
 
 @app.route("/get-subjects-sessions")
 def get_subjects_sessions():
-    return jsonify({"subject": LAYOUT.get_subjects(), "session": LAYOUT.get_sessions()})
+    return jsonify(
+        {"subjectList": LAYOUT.get_subjects(), "sessionList": LAYOUT.get_sessions()}
+    )
 
 
 @app.route("/get-image-path", methods=["POST"])

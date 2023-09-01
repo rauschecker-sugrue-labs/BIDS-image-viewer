@@ -45,8 +45,8 @@ function App() {
       .get("/get-subjects-sessions")
       .then((response) => {
         setIds({
-          subject: response.data.subject,
-          session: response.data.session,
+          subject: response.data.subjectList,
+          session: response.data.sessionList,
         });
       })
       .catch((error) => {
