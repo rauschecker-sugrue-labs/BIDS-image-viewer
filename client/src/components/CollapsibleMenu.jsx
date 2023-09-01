@@ -22,6 +22,11 @@ export function CollapsibleMenu({ onAddLayerClick }) {
     setMenuOpen(!menuOpen);
   };
 
+  const onAddLayerClickClose = () => {
+    onAddLayerClick();
+    setMenuOpen(false);
+  };
+
   return (
     <div>
       <CssBaseline />
@@ -48,7 +53,7 @@ export function CollapsibleMenu({ onAddLayerClick }) {
         <Button
           variant="contained"
           color="primary"
-          onClick={onAddLayerClick}
+          onClick={onAddLayerClickClose}
           style={{ margin: "10px" }}
           endIcon={<AddIcon />}
         >
