@@ -18,8 +18,6 @@ const NiiVue = ({ volumeList, meshList }) => {
   volumeList.forEach((url, index) => {
     const ext = url.substring(url.lastIndexOf(".")); // Get the file extension
     const fullExt = "." + url.split(".").slice(-2).join("."); // Get the full extension for cases like '.nii.gz'
-    console.debug("ext: ", ext);
-    console.debug("fullext: ", fullExt);
     if (supportedExt.volume.includes(ext) || supportedExt.volume.includes(fullExt)) {
       newVolumeList.push({ url });
     } else if (supportedExt.mesh.includes(ext) || supportedExt.mesh.includes(fullExt)) {
@@ -28,8 +26,6 @@ const NiiVue = ({ volumeList, meshList }) => {
   });
 
   const canvas = useRef();
-  console.debug("newVolumeList", newVolumeList, newVolumeList[0]);
-  console.debug("newMeshList", newMeshList, newMeshList[0]);
   useEffect(() => {
     const loadResourcesAndSetSliceType = async () => {
       const nv = new Niivue();
@@ -61,10 +57,6 @@ function App() {
   const [lastSuccessfulLayerSelection, setLastSuccessfulLayerSelection] = useState({});
   const [wasPathValid, setWasPathValid] = useState(false);
   const [showErrorMessage, setShowErrorMessage] = useState(false);
-  const supportedExt = {
-    volume: ["nii.gz", ".nii.gz", ".nii", ".gz"],
-    mesh: [".trk", ".trx"],
-  };
 
   // ************** Debugging **************  \\
   useEffect(() => {
@@ -105,48 +97,6 @@ function App() {
   }, []);
 
   // ************** Functions **************  \\
-  const getValidPath = async (params, layerIndex, type) => {
-    try {
-      const data = await updateFields(params);
-      if (data.exists) {
-        setLastSuccessfulSelection({
-          ...lastSuccessfulSelection,
-          [type]: params[type],
-        });
-        setShowErrorMessage(false);
-
-        const newImageUrls = [...imageUrls];
-        newImageUrls[layerIndex] = data.path;
-        setImageUrls(newImageUrls);
-        setWasPathValid(true);
-        return true;
-      } else {
-        console.debug("Path does not exist");
-        console.debug(wasPathValid);
-        if (wasPathValid) {
-          setShowErrorMessage(true);
-        }
-        setWasPathValid(false);
-        return false;
-      }
-    } catch (error) {
-      console.error("Error:", error);
-      setWasPathValid(false);
-      return false;
-    }
-  };
-
-  // ************** Handlers **************  \\
-  const handleAddLayerClick = async () => {
-    try {
-      const bidsEntities = await getFields();
-      const newLayer = createNewLayer(bidsEntities);
-      setLayers([...layers, newLayer]);
-    } catch (error) {
-      console.error("There was an error adding a new layer:", error);
-    }
-  };
-
   const updateLayer = async (layerIndex, newIds, newParams) => {
     const selections = { ...newIds, ...newParams };
     console.debug("layerIndex", layerIndex, "selections", selections);
@@ -166,6 +116,17 @@ function App() {
       //TODO: update entities, graying out choices that won't lead to a valid path
     }
     setLayers(updatedLayers);
+  };
+
+  // ************** Handlers **************  \\
+  const handleAddLayerClick = async () => {
+    try {
+      const bidsEntities = await getFields();
+      const newLayer = createNewLayer(bidsEntities);
+      setLayers([...layers, newLayer]);
+    } catch (error) {
+      console.error("There was an error adding a new layer:", error);
+    }
   };
 
   const handleGlobalChange = async (newIds, type) => {
