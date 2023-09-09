@@ -4,6 +4,7 @@ import "./App.css";
 import { getSubjectsSessions, getFields, updateFields, getPath } from "./api";
 import { CollapsibleMenu } from "./components/CollapsibleMenu";
 import { DropdownContainer, getInitialSelections } from "./components/tools";
+import Box from "@mui/material/Box";
 import NiiVue from "./Niivue";
 
 function App() {
@@ -207,48 +208,51 @@ function App() {
     <div className="App">
       {ids ? (
         <>
-          <div>
-            <CollapsibleMenu
-              menuOpen={menuOpen}
-              onAddLayerClick={handleAddLayerClick}
-            />
-            {/* Add subject-session container */}
-            <DropdownContainer
-              dataDict={ids}
-              onSelectionChange={(newIds, type) => handleGlobalChange(newIds, type)}
-              isDeletable={false}
-            />
-            {/* Add layer containers */}
-            {layers.length > 0 &&
-              layers.map((layer, index) => (
-                <DropdownContainer
-                  key={index}
-                  dataDict={layer.entities}
-                  onSelectionChange={(newSelections) =>
-                    handleLayerSelectionChange(index, newSelections)
-                  }
-                  onDelete={() => handleDeleteLayer(index)}
-                  isDeletable={true}
-                />
-              ))}
-          </div>
-          <div className="niivue-container">
-            {layers.map((layer) => layer.imageUrl).filter(Boolean).length > 0 ? (
-              <NiiVue
-                volumeList={layers.map((layer) => layer.imageUrl).filter(Boolean)}
+          <Box display="flex" flexDirection="column" height="100vh">
+            <Box>
+              <CollapsibleMenu
+                menuOpen={menuOpen}
+                onAddLayerClick={handleAddLayerClick}
               />
-            ) : (
-              <p
-                style={{
-                  backgroundColor: "white",
-                  color: "black",
-                  fontStyle: "oblique",
-                }}
-              >
-                Choose an image to load...
-              </p>
-            )}
-          </div>
+              {/* Add subject-session container */}
+              <DropdownContainer
+                dataDict={ids}
+                onSelectionChange={(newIds, type) => handleGlobalChange(newIds, type)}
+                isDeletable={false}
+              />
+              {/* Add layer containers */}
+              {layers.length > 0 &&
+                layers.map((layer, index) => (
+                  <DropdownContainer
+                    key={index}
+                    dataDict={layer.entities}
+                    onSelectionChange={(newSelections) =>
+                      handleLayerSelectionChange(index, newSelections)
+                    }
+                    onDelete={() => handleDeleteLayer(index)}
+                    isDeletable={true}
+                  />
+                ))}
+            </Box>
+            <Box className="niivue-container" flexGrow={1} minHeight="300px">
+              {layers.map((layer) => layer.imageUrl).filter(Boolean).length > 0 ? (
+                <NiiVue
+                  imageUrls={layers.map((layer) => layer.imageUrl).filter(Boolean)}
+                />
+              ) : (
+                <p
+                  style={{
+                    backgroundColor: "white",
+                    color: "black",
+                    fontStyle: "oblique",
+                  }}
+                >
+                  Choose an image to load...
+                </p>
+              )}
+            </Box>
+            <Box flexBasis={"50px"}></Box>
+          </Box>
         </>
       ) : (
         <p>Loading...</p>
