@@ -6,41 +6,6 @@ import { CollapsibleMenu } from "./components/CollapsibleMenu";
 import { DropdownContainer, getInitialSelections } from "./components/tools";
 import NiiVue from "./Niivue";
 
-const supportedExt = {
-  volume: ["nii.gz", ".nii.gz", ".nii", ".gz"],
-  mesh: [".trk", ".trx"],
-};
-
-const NiiVue = ({ volumeList, meshList }) => {
-  const newVolumeList = [];
-  const newMeshList = [];
-
-  volumeList.forEach((url, index) => {
-    const ext = url.substring(url.lastIndexOf(".")); // Get the file extension
-    const fullExt = "." + url.split(".").slice(-2).join("."); // Get the full extension for cases like '.nii.gz'
-    if (supportedExt.volume.includes(ext) || supportedExt.volume.includes(fullExt)) {
-      newVolumeList.push({ url });
-    } else if (supportedExt.mesh.includes(ext) || supportedExt.mesh.includes(fullExt)) {
-      newMeshList.push({ url });
-    }
-  });
-
-  const canvas = useRef();
-  useEffect(() => {
-    const loadResourcesAndSetSliceType = async () => {
-      const nv = new Niivue();
-      nv.attachToCanvas(canvas.current);
-      nv.loadVolumes(newVolumeList);
-      await nv.loadMeshes(newMeshList); // Await completion before moving on
-      nv.setSliceType(nv.sliceTypeMultiplanar);
-    };
-
-    loadResourcesAndSetSliceType();
-  }, [volumeList, meshList]);
-
-  return <canvas ref={canvas} height={480} width={640} />;
-};
-
 function App() {
   useEffect(() => {
     document.title = "BIDS Image Visualizer";
