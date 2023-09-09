@@ -11,11 +11,12 @@ import {
   CssBaseline,
   Typography,
 } from "@mui/material";
+import { Brightness4, Brightness7 } from "@mui/icons-material";
 import MenuIcon from "@mui/icons-material/Menu";
 import AddIcon from "@mui/icons-material/Add";
 import { styled } from "@mui/system";
 
-export function CollapsibleMenu({ onAddLayerClick }) {
+export function CollapsibleMenu({ onAddLayerClick, toggleTheme, theme }) {
   const [menuOpen, setMenuOpen] = useState(false);
 
   const handleToggle = () => {
@@ -45,8 +46,11 @@ export function CollapsibleMenu({ onAddLayerClick }) {
             <MenuIcon />
           </IconButton>
           <Typography variant="h6" style={{ flexGrow: 1 }}>
-            Image Viewer
+            BIDS Image Viewer
           </Typography>
+          <IconButton sx={{ ml: 1 }} onClick={toggleTheme} color="inherit">
+            {theme.palette.mode === "dark" ? <Brightness7 /> : <Brightness4 />}
+          </IconButton>
         </Toolbar>
       </AppBar>
       <Drawer anchor="left" open={menuOpen} onClose={handleToggle}>

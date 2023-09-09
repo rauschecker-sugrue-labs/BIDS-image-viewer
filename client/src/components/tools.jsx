@@ -16,10 +16,7 @@ import {
   DialogTitle,
 } from "@mui/material";
 
-import {
-  RestartAlt,
-  DeleteForeverOutlined as DelIcon,
-} from "@mui/icons-material";
+import { RestartAlt, DeleteOutlined as DelIcon } from "@mui/icons-material";
 import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import "../App.css";

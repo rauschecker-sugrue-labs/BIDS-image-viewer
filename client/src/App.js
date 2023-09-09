@@ -4,7 +4,11 @@ import "./App.css";
 import { getSubjectsSessions, getFields, updateFields, getPath } from "./api";
 import { CollapsibleMenu } from "./components/CollapsibleMenu";
 import { DropdownContainer, getInitialSelections } from "./components/tools";
+import CssBaseline from "@mui/material/CssBaseline";
+import { createTheme, ThemeProvider, useTheme } from "@mui/material/styles";
 import Box from "@mui/material/Box";
+import useMediaQuery from "@mui/material/useMediaQuery";
+
 import NiiVue from "./Niivue";
 
 function App() {
@@ -204,64 +208,84 @@ function App() {
     console.log(layers);
   }, [imageUrls]);
 
+  // ************** Rendering **************  \\
+  const [isManualOverride, setIsManualOverride] = useState(false);
+  const prefersDarkMode = useMediaQuery("(prefers-color-scheme: dark)");
+  const [mode, setMode] = useState(prefersDarkMode ? "dark" : "light");
+  const theme = createTheme({
+    palette: {
+      mode: mode,
+    },
+  });
+  // Listen for system color scheme changes
+  useEffect(() => {
+    if (!isManualOverride) {
+      const systemTheme = window.matchMedia("(prefers-color-scheme: dark)").matches
+        ? "dark"
+        : "light";
+      setMode(systemTheme);
+    }
+  }, [isManualOverride]);
+  const toggleTheme = () => {
+    setMode((prevMode) => (prevMode === "light" ? "dark" : "light"));
+    setIsManualOverride(true);
+  };
+
   return (
     <div className="App">
-      {ids ? (
-        <>
-          <Box display="flex" flexDirection="column" height="100vh">
-            <Box>
-              <CollapsibleMenu
-                menuOpen={menuOpen}
-                onAddLayerClick={handleAddLayerClick}
-              />
-              {/* Add subject-session container */}
-              <DropdownContainer
-                dataDict={ids}
-                onSelectionChange={(newIds, type) => handleGlobalChange(newIds, type)}
-                isDeletable={false}
-              />
-              {/* Add layer containers */}
-              {layers.length > 0 &&
-                layers.map((layer, index) => (
-                  <DropdownContainer
-                    key={index}
-                    dataDict={layer.entities}
-                    onSelectionChange={(newSelections) =>
-                      handleLayerSelectionChange(index, newSelections)
-                    }
-                    onDelete={() => handleDeleteLayer(index)}
-                    isDeletable={true}
-                  />
-                ))}
-            </Box>
-            <Box className="niivue-container" flexGrow={1} minHeight="300px">
-              {layers.map((layer) => layer.imageUrl).filter(Boolean).length > 0 ? (
-                <NiiVue
-                  imageUrls={layers.map((layer) => layer.imageUrl).filter(Boolean)}
+      <CssBaseline />
+      <ThemeProvider theme={theme}>
+        {ids ? (
+          <>
+            <Box display="flex" flexDirection="column" height="100vh">
+              <Box>
+                <CollapsibleMenu
+                  menuOpen={menuOpen}
+                  onAddLayerClick={handleAddLayerClick}
+                  toggleTheme={toggleTheme}
+                  theme={theme}
                 />
-              ) : (
-                <p
-                  style={{
-                    backgroundColor: "white",
-                    color: "black",
-                    fontStyle: "oblique",
-                  }}
-                >
-                  Choose an image to load...
-                </p>
-              )}
+                {/* Add subject-session container */}
+                <DropdownContainer
+                  dataDict={ids}
+                  onSelectionChange={(newIds, type) => handleGlobalChange(newIds, type)}
+                  isDeletable={false}
+                />
+                {/* Add layer containers */}
+                {layers.length > 0 &&
+                  layers.map((layer, index) => (
+                    <DropdownContainer
+                      key={index}
+                      dataDict={layer.entities}
+                      onSelectionChange={(newSelections) =>
+                        handleLayerSelectionChange(index, newSelections)
+                      }
+                      onDelete={() => handleDeleteLayer(index)}
+                      isDeletable={true}
+                    />
+                  ))}
+              </Box>
+              <Box className="niivue-container" flexGrow={1} minHeight="300px">
+                {layers.map((layer) => layer.imageUrl).filter(Boolean).length > 0 ? (
+                  <NiiVue
+                    imageUrls={layers.map((layer) => layer.imageUrl).filter(Boolean)}
+                  />
+                ) : (
+                  <p>Choose an image to load...</p>
+                )}
+              </Box>
+              <Box flexBasis={"50px"}></Box>
             </Box>
-            <Box flexBasis={"50px"}></Box>
-          </Box>
-        </>
-      ) : (
-        <p>Loading...</p>
-      )}
-      {showErrorMessage && (
-        <p style={{ color: "red" }}>
-          Error: Unable to find a valid path for the selected item.
-        </p>
-      )}
+          </>
+        ) : (
+          <p>Loading...</p>
+        )}
+        {showErrorMessage && (
+          <p style={{ color: "red" }}>
+            Error: Unable to find a valid path for the selected item.
+          </p>
+        )}
+      </ThemeProvider>
     </div>
   );
 }
