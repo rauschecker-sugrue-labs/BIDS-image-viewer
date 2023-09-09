@@ -4,7 +4,7 @@ import "./App.css";
 import { getSubjectsSessions, getFields, updateFields, getPath } from "./api";
 import { CollapsibleMenu } from "./components/CollapsibleMenu";
 import { DropdownContainer, getInitialSelections } from "./components/tools";
-import { Niivue } from "@niivue/niivue";
+import NiiVue from "./Niivue";
 
 const supportedExt = {
   volume: ["nii.gz", ".nii.gz", ".nii", ".gz"],
