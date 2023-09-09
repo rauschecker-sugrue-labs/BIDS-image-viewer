@@ -8,6 +8,15 @@ from collections import defaultdict
 # %%
 # save time and only load a few subjects
 # BIDSLayout(bids_dir, ignore=[re.compile(r"(sub-(?!25)\d*/)")])
+EXCLUSION_STR = ["json", "xform", "csv", "bval", "bvec"]
+
+
+def toPathList_exclude(str_list: list, exclude: list = EXCLUSION_STR) -> list:
+    """Convert a list of absolute path strings to a list of relative Path objects,
+    excluding some extensions"""
+    return [
+        Path(m.relpath) for m in str_list if not any(e in m.relpath for e in exclude)
+    ]
 
 
 def get_layout(root_dir: Path) -> BIDSLayout:
@@ -33,10 +42,12 @@ def get_layout(root_dir: Path) -> BIDSLayout:
 def get_fp(layout: BIDSLayout, kwargs: dict):
     """Get the filepath of the image of interest based on series of bids arguments"""
     try:
-        fp = layout.get(return_type="filename", absolute_paths=False, **kwargs)
+        fp = layout.get(**kwargs)
     except FileNotFoundError:
         UserWarning(FileNotFoundError("No file found"))
         return None
+    if len(fp) > 0:
+        fp = toPathList_exclude(fp)
     if len(fp) > 1:
         UserWarning(Exception("More than one file found, please specify more"))
         return None
@@ -46,11 +57,18 @@ def get_fp(layout: BIDSLayout, kwargs: dict):
     return Path(fp[0])
 
 
+def create_dict(fname):
+    fparsed = fname.split("_")
+    suffix = fparsed.pop()
+    md = {sp[0]: sp[1] for m in fparsed if len((sp := m.split("-"))) > 1}
+    md["suffix"] = suffix
+    return md
+
 
 def get_choices(layout: BIDSLayout, kwargs: dict, exclude: list):
     """Get the list of choices for a given layout and kwargs under dict format"""
-    files = layout.get(return_type="filename", absolute_paths=False, **kwargs)
-    files = [Path(m) for m in files]
+    files = layout.get(**kwargs)
+    files = toPathList_exclude(files)
     files = [fp.name.split("run-01_")[1].split(".nii.gz")[0] for fp in files]
     files = np.unique(files)
     files = [m for m in files if not any([e in m for e in exclude])]
@@ -66,13 +84,11 @@ def parse_bids_data_attributes(layout: BIDSLayout, kwargs: dict = {}):
         parse_bids_data_attributes(layout, {'suffix':'T1w'})
         ```
     """
-    all_files = layout.get(
-        return_type="filename", absolute_paths=False, **kwargs
-    )  # TODO perform tests on the server with 10000 subjects...
-    exclude = ["json", "xform", "csv", "bval", "bvec"]
+    all_files = layout.get(**kwargs)
+    # TODO perform tests on the server with 10000 subjects...
 
     # Convert to relative paths & exclude
-    all_files = [Path(m) for m in all_files if not any(e in m for e in exclude)]
+    all_files = toPathList_exclude(all_files)
     scopes = np.unique([m.parts[1] for m in all_files])
     all_files = [m.name for m in all_files]
 
@@ -101,6 +117,8 @@ def parse_bids_data_attributes(layout: BIDSLayout, kwargs: dict = {}):
     to_drop = []
     for key, value in result_dict.items():
         try:
+            if isinstance(value, list):
+                value = [value]
             layout.get(**{key: value[0]})
         except ValueError:
             to_drop.append(key)
