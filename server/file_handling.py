@@ -73,6 +73,14 @@ def get_choices(layout: BIDSLayout, kwargs: dict, exclude: list):
     return [create_dict(m) for m in files]
 
 
+def find_scope(fp: Path) -> str:
+    """Find the scope of the file based on the path.
+    Assumes that the path is a BIDS derivatives path."""
+    fp_list = fp.parts
+    index = fp_list.index("derivatives")
+    return fp_list[index + 1]
+
+
 def parse_bids_data_attributes(layout: BIDSLayout, kwargs: dict = {}):
     """Parse the bids data attributes and return a dictionary of possible choices
 
@@ -87,7 +95,7 @@ def parse_bids_data_attributes(layout: BIDSLayout, kwargs: dict = {}):
 
     # Convert to relative paths & exclude
     all_files = toPathList_exclude(all_files)
-    scopes = np.unique([m.parts[1] for m in all_files])
+    scopes = np.unique([find_scope(m) for m in all_files])
     all_files = [m.name for m in all_files]
 
     # Extract extensions and suffixes
