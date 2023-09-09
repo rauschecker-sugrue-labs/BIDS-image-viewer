@@ -1,18 +1,41 @@
 import axios from "axios";
 import { useEffect, useState, useRef } from "react";
 import "./App.css";
+import { getSubjectsSessions, getFields, updateFields, getPath } from "./api";
 import { CollapsibleMenu } from "./components/CollapsibleMenu";
 import { DropdownContainer, getInitialSelections } from "./components/tools";
 import { Niivue } from "@niivue/niivue";
 
+const supportedExt = {
+  volume: ["nii.gz", ".nii.gz", ".nii", ".gz"],
+  mesh: [".trk", ".trx"],
+};
+
 const NiiVue = ({ volumeList, meshList }) => {
+  const newVolumeList = [];
+  const newMeshList = [];
+
+  volumeList.forEach((url, index) => {
+    const ext = url.substring(url.lastIndexOf(".")); // Get the file extension
+    const fullExt = "." + url.split(".").slice(-2).join("."); // Get the full extension for cases like '.nii.gz'
+    console.debug("ext: ", ext);
+    console.debug("fullext: ", fullExt);
+    if (supportedExt.volume.includes(ext) || supportedExt.volume.includes(fullExt)) {
+      newVolumeList.push({ url });
+    } else if (supportedExt.mesh.includes(ext) || supportedExt.mesh.includes(fullExt)) {
+      newMeshList.push({ url });
+    }
+  });
+
   const canvas = useRef();
+  console.debug("newVolumeList", newVolumeList, newVolumeList[0]);
+  console.debug("newMeshList", newMeshList, newMeshList[0]);
   useEffect(() => {
     const loadResourcesAndSetSliceType = async () => {
       const nv = new Niivue();
       nv.attachToCanvas(canvas.current);
-      nv.loadVolumes(volumeList);
-      await nv.loadMeshes(meshList); // Await completion before moving on
+      nv.loadVolumes(newVolumeList);
+      await nv.loadMeshes(newMeshList); // Await completion before moving on
       nv.setSliceType(nv.sliceTypeMultiplanar);
     };
 
@@ -26,7 +49,7 @@ function App() {
   useEffect(() => {
     document.title = "BIDS Image Visualizer";
   }, []);
-
+  // ************** Setup **************  \\
   const [menuOpen, setMenuOpen] = useState(false);
   const [layers, setLayers] = useState([]);
   const [imageUrls, setImageUrls] = useState([]);
@@ -34,76 +57,137 @@ function App() {
   const [meshList, setMeshList] = useState([]);
   const [ids, setIds] = useState({});
   const [globalId, setGlobalId] = useState({ subject: null, session: null });
+  const [lastSuccessfulSelection, setLastSuccessfulSelection] = useState({});
+  const [lastSuccessfulLayerSelection, setLastSuccessfulLayerSelection] = useState({});
+  const [wasPathValid, setWasPathValid] = useState(false);
+  const [showErrorMessage, setShowErrorMessage] = useState(false);
   const supportedExt = {
     volume: ["nii.gz", ".nii.gz", ".nii", ".gz"],
     mesh: [".trk", ".trx"],
   };
 
+  // ************** Debugging **************  \\
   useEffect(() => {
-    console.debug("Fetching subjects and sessions");
-    axios
-      .get("/get-subjects-sessions")
-      .then((response) => {
+    console.debug("Layers:", layers);
+  }, [layers]);
+
+  const createNewLayer = (entities) => {
+    return {
+      entities,
+      chosenValues: {},
+      lastSuccessfulSelection: {},
+      wasPathValid: false,
+      imageUrl: null,
+    };
+  };
+
+  // ************** Initialization **************  \\
+  useEffect(() => {
+    console.info("Initializing...");
+    const initialization = async () => {
+      try {
+        let data;
+        console.debug("Fetching subjects and sessions");
+        data = await getSubjectsSessions();
         setIds({
-          subject: response.data.subjectList,
-          session: response.data.sessionList,
+          subject: data.subjectList,
+          session: data.sessionList,
         });
-      })
-      .catch((error) => {
-        console.error("There was an error fetching data: ", error);
-      });
+        console.debug("Fetching fields");
+        data = await getFields();
+        const newLayer = createNewLayer(data);
+        setLayers([newLayer]);
+      } catch (error) {
+        console.error("There was an error initializing the app:", error);
+      }
+    };
+    initialization();
   }, []);
 
-  // Function to check for valid path
-  const getValidPath = async (params, layerIndex) => {
+  // ************** Functions **************  \\
+  const getValidPath = async (params, layerIndex, type) => {
     try {
-      const response = await axios.post("/get-image-path", params);
-          if (response.data.exists) {
+      const data = await updateFields(params);
+      if (data.exists) {
+        setLastSuccessfulSelection({
+          ...lastSuccessfulSelection,
+          [type]: params[type],
+        });
+        setShowErrorMessage(false);
+
         const newImageUrls = [...imageUrls];
-        newImageUrls[layerIndex] = response.data.path;
+        newImageUrls[layerIndex] = data.path;
         setImageUrls(newImageUrls);
+        setWasPathValid(true);
+        return true;
+      } else {
+        console.debug("Path does not exist");
+        console.debug(wasPathValid);
+        if (wasPathValid) {
+          setShowErrorMessage(true);
+        }
+        setWasPathValid(false);
+        return false;
       }
     } catch (error) {
       console.error("Error:", error);
-          }
-  };
-
-  const fetchData = async () => {
-    try {
-      const response = await axios.get("/get-fields");
-      const bidsEntities = response.data;
-      setLayers([bidsEntities]);
-    } catch (error) {
-      console.error("There was an error fetching the default layer:", error);
+      setWasPathValid(false);
+      return false;
     }
   };
 
-  // This useEffect will run when the component mounts
-  useEffect(() => {
-    fetchData();
-  }, []);
-
+  // ************** Handlers **************  \\
   const handleAddLayerClick = async () => {
     try {
-      const response = await axios.get("/get-fields");
-      const bidsEntities = response.data;
-      setLayers([...layers, bidsEntities]);
+      const bidsEntities = await getFields();
+      const newLayer = createNewLayer(bidsEntities);
+      setLayers([...layers, newLayer]);
     } catch (error) {
       console.error("There was an error adding a new layer:", error);
     }
   };
 
-  const handleGlobalChange = async (newIds) => {
+  const updateLayer = async (layerIndex, newIds, newParams) => {
+    const selections = { ...newIds, ...newParams };
+    console.debug("layerIndex", layerIndex, "selections", selections);
+    const newPath = await getPath(selections);
+    console.debug("getting path: ", newPath);
+    const updatedLayers = [...layers];
+    if (newPath.exists) {
+      updatedLayers[layerIndex].imageUrl = newPath.path;
+      updatedLayers[layerIndex].chosenValues = newParams;
+    } else if (!newPath.exists && updatedLayers[layerIndex].imageUrl) {
+      console.debug("Path does not exist, and `imageUrl` was set already");
+      setShowErrorMessage(true); // add info about which layer is invalid
+      //TODO reset layer to previous valid state, using chosenValues which still reflects the previous state
+    } else {
+      console.debug("Path does not exist and no `imageUrl` was set yet.");
+      updatedLayers[layerIndex].chosenValues = newParams;
+      //TODO: update entities, graying out choices that won't lead to a valid path
+    }
+    setLayers(updatedLayers);
+  };
+
+  const handleGlobalChange = async (newIds, type) => {
     setGlobalId(newIds);
+    console.debug("just reset newIds");
     for (let layerIndex = 0; layerIndex < layers.length; layerIndex++) {
-      const layer = layers[layerIndex];
-    // Merge global IDs and selections for the layer
-    const updatedSelections = { ...newIds, ...layer };
-      await getValidPath(updatedSelections, layerIndex);
+      const layerValues = layers[layerIndex].chosenValues;
+      console.debug("layerValues", layerValues);
+      if (Object.keys(layerValues).length !== 0) {
+        await updateLayer(layerIndex, newIds, layerValues);
+      }
+    }
+    if (showErrorMessage && type) {
+      // Reset the subject-session dropdown to the last successful selection
+      setGlobalId({
+        ...globalId,
+        [type]: lastSuccessfulSelection[type],
+      });
     }
   };
 
-  const handleLayerSelectionChange = async (layerIndex, newSelections) => {
+  const handleLayerSelectionChange = async (layerIndex, newSelections, type) => {
     try {
       // Filter only the keys that have non-empty values
       const filteredSelections = Object.fromEntries(
@@ -122,24 +206,41 @@ function App() {
       );
       console.debug("filteredSelections");
       console.debug(filteredSelections);
-      const response = await axios.post("/update-fields", filteredSelections);
-      const updatedLayer = response.data;
-      // Only update if there are changes
-      if (JSON.stringify(layers[layerIndex]) !== JSON.stringify(updatedLayer)) {
-        const updatedLayers = [...layers];
-        updatedLayers[layerIndex] = updatedLayer;
-        setLayers(updatedLayers);
-        // Try to get path for that layer
-        console.debug({ ...globalId, ...filteredSelections });
-        console.debug("getValidPath");
-        console.debug(getValidPath({ ...globalId, ...filteredSelections }));
-        const updatedSelections = { ...globalId, ...updatedLayer };
-        await getValidPath(updatedSelections, layerIndex);
-      }
+      await updateLayer(layerIndex, globalId, filteredSelections);
     } catch (error) {
       console.error("There was an error updating the layer:", error);
     }
   };
+  // const newPath = await getPath(filteredSelections);
+  // if (newPath.exists) {
+  //   // update layer
+  //   updateLayer(layerIndex, globalId, filteredSelections);
+  // } else {
+  //   // update dropdown choices
+  // }
+  // const updatedLayerParams = await updateFields(filteredSelections);
+  // // Only update if there are changes
+  // if (JSON.stringify(layers[layerIndex]) !== JSON.stringify(updatedLayerParams)) {
+  //   const updatedLayers = [...layers];
+  //   updatedLayers[layerIndex].entities = updatedLayerParams;
+  //   setLayers(updatedLayers);
+  //   // Try to get path for that layer
+  //   const updatedSelections = { ...globalId, ...updatedLayerParams };
+  //   const validPath = await getValidPath(updatedSelections, layerIndex); // Assume getValidPath returns true if the path is valid
+
+  //   if (validPath) {
+  //     setLastSuccessfulLayerSelection({
+  //       ...lastSuccessfulLayerSelection,
+  //       [layerIndex]: { ...updatedLayerParams },
+  //     });
+  //   } else {
+  //     if (showErrorMessage && type) {
+  //       const updatedLayers = [...layers];
+  //       updatedLayers[layerIndex] = lastSuccessfulLayerSelection[layerIndex];
+  //       setLayers(updatedLayers);
+  //     }
+  //   }
+  // }
   const handleDeleteLayer = (layerIndex) => {
     const newLayers = [...layers];
     newLayers.splice(layerIndex, 1);
@@ -156,14 +257,10 @@ function App() {
 
     imageUrls.forEach((url, index) => {
       const ext = url.substring(url.lastIndexOf(".")); // Get the file extension
-      const fullExt = url.split(".").slice(-2).join("."); // Get the full extension for cases like '.nii.gz'
+      const fullExt = "." + url.split(".").slice(-2).join("."); // Get the full extension for cases like '.nii.gz'
       console.debug("ext: ", ext);
       console.debug("fullext: ", fullExt);
-      // console.debug("fullext: ", fullext);
-      if (
-        supportedExt.volume.includes(ext) ||
-        supportedExt.volume.includes(fullExt)
-      ) {
+      if (supportedExt.volume.includes(ext) || supportedExt.volume.includes(fullExt)) {
         newVolumeList.push({ url });
       } else if (
         supportedExt.mesh.includes(ext) ||
@@ -189,26 +286,31 @@ function App() {
               menuOpen={menuOpen}
               onAddLayerClick={handleAddLayerClick}
             />
+            {/* Add subject-session container */}
             <DropdownContainer
-            dataDict={ids}
-            onSelectionChange={handleGlobalChange}
+              dataDict={ids}
+              onSelectionChange={(newIds, type) => handleGlobalChange(newIds, type)}
               isDeletable={false}
-          />
-            {layers.map((layer, index) => (
-              <DropdownContainer
-                key={index}
-                dataDict={layer}
-                onSelectionChange={(newSelections) =>
-                  handleLayerSelectionChange(index, newSelections)
-                }
-                onDelete={() => handleDeleteLayer(index)}
-                isDeletable={true}
-              />
-            ))}
+            />
+            {/* Add layer containers */}
+            {layers.length > 0 &&
+              layers.map((layer, index) => (
+                <DropdownContainer
+                  key={index}
+                  dataDict={layer.entities}
+                  onSelectionChange={(newSelections) =>
+                    handleLayerSelectionChange(index, newSelections)
+                  }
+                  onDelete={() => handleDeleteLayer(index)}
+                  isDeletable={true}
+                />
+              ))}
           </div>
           <div className="niivue-container">
-            {volumeList.length > 0 || meshList.length > 0 ? (
-              <NiiVue volumeList={volumeList} meshList={meshList} />
+            {layers.map((layer) => layer.imageUrl).filter(Boolean).length > 0 ? (
+              <NiiVue
+                volumeList={layers.map((layer) => layer.imageUrl).filter(Boolean)}
+              />
             ) : (
               <p
                 style={{
@@ -224,6 +326,11 @@ function App() {
         </>
       ) : (
         <p>Loading...</p>
+      )}
+      {showErrorMessage && (
+        <p style={{ color: "red" }}>
+          Error: Unable to find a valid path for the selected item.
+        </p>
       )}
     </div>
   );
