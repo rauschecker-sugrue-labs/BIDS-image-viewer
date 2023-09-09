@@ -124,7 +124,7 @@ export function DropdownContainer({
   const showConfirmDialog = () => {
     setOpenDialog(true);
   };
-
+  const gridSize = Object.keys(dataDict).length === 2 ? 6 : 3;
   return (
     <Container>
       <Paper
@@ -133,7 +133,7 @@ export function DropdownContainer({
       >
         <Grid container spacing={3}>
           {sortKeysByCustomOrder(Object.keys(dataDict)).map((key) => (
-            <Grid item xs={6} sm={3} md={6} key={key}>
+            <Grid item xs={6} sm={gridSize} md={6} key={key}>
               <FormControl variant="outlined" fullWidth>
                 <InputLabel htmlFor={key}>{key}</InputLabel>
                 <Select
