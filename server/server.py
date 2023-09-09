@@ -57,6 +57,8 @@ def get_image_path():
     data = request.json
     # Build the path using pyBIDS and check if the image exists
     image_path = fh.get_fp(LAYOUT, data)
+    if image_path:
+        image_path = image_path.relative_to(ROOTDIR)
     exists = image_path is not None
     print(f"Image exists: {exists} at {image_path}")
     return jsonify({"exists": exists, "path": str(image_path) if exists else None})

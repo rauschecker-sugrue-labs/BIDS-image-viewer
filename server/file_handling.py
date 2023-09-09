@@ -12,11 +12,9 @@ EXCLUSION_STR = ["json", "xform", "csv", "bval", "bvec"]
 
 
 def toPathList_exclude(str_list: list, exclude: list = EXCLUSION_STR) -> list:
-    """Convert a list of absolute path strings to a list of relative Path objects,
+    """Convert a list of absolute path strings to a list of Path objects,
     excluding some extensions"""
-    return [
-        Path(m.relpath) for m in str_list if not any(e in m.relpath for e in exclude)
-    ]
+    return [Path(m.path) for m in str_list if not any(e in m.relpath for e in exclude)]
 
 
 def get_layout(root_dir: Path) -> BIDSLayout:
