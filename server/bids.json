@@ -1,0 +1,17 @@
+{
+  "name": "bidsafq",
+  "entities": [
+    {
+      "name": "algo",
+      "pattern": "[_/\\\\]+algo-([a-zA-Z0-9]+)"
+    },
+    {
+      "name": "desc",
+      "pattern": "[_/\\\\]+desc-([a-zA-Z0-9]+)"
+    },
+    {
+      "name": "model",
+      "pattern": "[_/\\\\]+model-([a-zA-Z0-9]+)"
+    }
+  ]
+}
