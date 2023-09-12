@@ -6,7 +6,7 @@ import { CollapsibleMenu } from "./components/CollapsibleMenu";
 import { DropdownContainer, getInitialSelections } from "./components/tools";
 import CssBaseline from "@mui/material/CssBaseline";
 import { createTheme, ThemeProvider, useTheme } from "@mui/material/styles";
-import Box from "@mui/material/Box";
+import { Box } from "@mui/material";
 import useMediaQuery from "@mui/material/useMediaQuery";
 
 import NiiVue from "./Niivue";
@@ -220,6 +220,7 @@ function App() {
                   dataDict={ids}
                   onSelectionChange={(newIds, type) => handleGlobalChange(newIds, type)}
                   isDeletable={false}
+                  imagePath={null}
                 />
                 {/* Add layer containers */}
                 {layers.length > 0 &&
@@ -232,6 +233,7 @@ function App() {
                       }
                       onDelete={() => handleDeleteLayer(index)}
                       isDeletable={true}
+                      imagePath={layer.imageUrl}
                     />
                   ))}
               </Box>
