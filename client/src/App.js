@@ -220,6 +220,7 @@ function App() {
   // Listen for system color scheme changes
   useEffect(() => {
     if (!isManualOverride) {
+      //FIXME: doesn't change the theme when the system theme changes
       const systemTheme = window.matchMedia("(prefers-color-scheme: dark)").matches
         ? "dark"
         : "light";
