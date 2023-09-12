@@ -19,13 +19,8 @@ function App() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [layers, setLayers] = useState([]);
   const [imageUrls, setImageUrls] = useState([]);
-  const [volumeList, setVolumeList] = useState([]);
-  const [meshList, setMeshList] = useState([]);
   const [ids, setIds] = useState({});
   const [globalId, setGlobalId] = useState({ subject: null, session: null });
-  const [lastSuccessfulSelection, setLastSuccessfulSelection] = useState({});
-  const [lastSuccessfulLayerSelection, setLastSuccessfulLayerSelection] = useState({});
-  const [wasPathValid, setWasPathValid] = useState(false);
   const [showErrorMessage, setShowErrorMessage] = useState(false);
 
   // ************** Debugging **************  \\
@@ -181,32 +176,6 @@ function App() {
     newImageUrls.splice(layerIndex, 1);
     setImageUrls(newImageUrls);
   };
-  useEffect(() => {
-    console.log("imageUrls updated:", imageUrls);
-    const newVolumeList = [];
-    const newMeshList = [];
-
-    imageUrls.forEach((url, index) => {
-      const ext = url.substring(url.lastIndexOf(".")); // Get the file extension
-      const fullExt = "." + url.split(".").slice(-2).join("."); // Get the full extension for cases like '.nii.gz'
-      console.debug("ext: ", ext);
-      console.debug("fullext: ", fullExt);
-      if (supportedExt.volume.includes(ext) || supportedExt.volume.includes(fullExt)) {
-        newVolumeList.push({ url });
-      } else if (
-        supportedExt.mesh.includes(ext) ||
-        supportedExt.mesh.includes(fullExt)
-      ) {
-        newMeshList.push({ url });
-      }
-    });
-
-    setVolumeList(newVolumeList);
-    setMeshList(newMeshList);
-    console.log("volumes updated: ", newVolumeList);
-    console.log("meshes updated: ", newMeshList);
-    console.log(layers);
-  }, [imageUrls]);
 
   // ************** Rendering **************  \\
   const [isManualOverride, setIsManualOverride] = useState(false);
