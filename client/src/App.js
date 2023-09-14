@@ -237,7 +237,7 @@ function App() {
                     />
                   ))}
               </Box>
-              <Box className="niivue-container" flexGrow={1} minHeight="300px">
+              <Box className="niivue-container" minHeight="300px">
                 {layers.map((layer) => layer.imageUrl).filter(Boolean).length > 0 ? (
                   <NiiVue
                     imageUrls={layers.map((layer) => layer.imageUrl).filter(Boolean)}
