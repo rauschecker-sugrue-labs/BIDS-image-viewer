@@ -23,7 +23,7 @@ import { useTheme } from "@mui/material/styles";
 
 import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
 import VisibilityIcon from "@mui/icons-material/Visibility";
-import { ConfirmDialog } from "./Dialogs";
+import { DeleteDialog } from "./Dialogs";
 import "../App.css";
 
 export function DropdownContainer({
@@ -135,7 +135,7 @@ export function DropdownContainer({
     setOpenDialog(false);
   };
 
-  const showConfirmDialog = () => {
+  const showDeleteDialog = () => {
     setOpenDialog(true);
   };
 
@@ -224,7 +224,7 @@ export function DropdownContainer({
                   color="primary"
                   size="small"
                   aria-label="delete"
-                  onClick={showConfirmDialog}
+                  onClick={showDeleteDialog}
                 >
                   <DelIcon fontSize="small" /> {/* Makes the icon smaller */}
                 </IconButton>
@@ -241,7 +241,7 @@ export function DropdownContainer({
           </div>
         </Grid>
 
-        <ConfirmDialog
+        <DeleteDialog
           open={openDialog}
           handleClose={handleClose}
           handleConfirm={handleConfirmDelete}
