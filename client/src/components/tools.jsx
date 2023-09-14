@@ -6,24 +6,11 @@ import {
   FormControl,
   InputLabel,
   Select,
-  MenuItem,
-  IconButton,
-  Button,
   Collapse,
   Tooltip,
 } from "@mui/material";
-
-import {
-  RestartAlt,
-  DeleteOutlined as DelIcon,
-  Edit,
-  Settings,
-} from "@mui/icons-material";
-import { useTheme } from "@mui/material/styles";
-
-import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
-import VisibilityIcon from "@mui/icons-material/Visibility";
 import { DeleteDialog } from "./Dialogs";
+import IconGroup from "./IconGroup";
 import "../App.css";
 
 export function DropdownContainer({
@@ -40,7 +27,6 @@ export function DropdownContainer({
       setIsCollapsed(true);
     }
   }, [imagePath]);
-  const theme = useTheme();
 
   const handleChange = (key, event) => {
     const value = event.target.value;
@@ -139,24 +125,6 @@ export function DropdownContainer({
     setOpenDialog(true);
   };
 
-  const iconGroupStyle = isCollapsed
-    ? {
-        display: "flex",
-        verticalAlign: "center",
-        justifyContent: "flex-end",
-        // padding: "5px",
-        // Add any other styles you want when the container is collapsed
-      }
-    : {
-        position: "absolute",
-        top: "-10px",
-        right: "-10px",
-        background: theme.palette.background.paper,
-        borderRadius: "10%",
-        padding: "5px",
-        boxShadow: "0px 0px 5px rgba(0,0,0,0.2)",
-      };
-
   const gridSize = Object.keys(dataDict).length === 2 ? 6 : 3;
   return (
     <Container>
@@ -194,51 +162,16 @@ export function DropdownContainer({
               <i style={filePathStyle}>{getShortName(imagePath)}</i>
             </Tooltip>
           )}
-          <div style={iconGroupStyle}>
-            {isCollapsed && (
-              <Tooltip title="Edit choices">
-                <IconButton color="primary" size="small" onClick={handleEditClick}>
-                  <Edit fontSize="small" />
-                </IconButton>
-              </Tooltip>
-            )}
-            <Tooltip title="Reset">
-              <IconButton
-                color="primary"
-                size="small"
-                aria-label="reset"
-                onClick={handleReset}
-                onMouseEnter={handleMouseEnter}
-                onMouseLeave={handleMouseLeave}
-                style={{
-                  transition: "transform 0.5s ease",
-                  transform: getRotationStyle(),
-                }}
-              >
-                <RestartAlt fontSize="small" /> {/* Makes the icon smaller */}
-              </IconButton>
-            </Tooltip>
-            {isDeletable && (
-              <Tooltip title="Delete layer">
-                <IconButton
-                  color="primary"
-                  size="small"
-                  aria-label="delete"
-                  onClick={showDeleteDialog}
-                >
-                  <DelIcon fontSize="small" /> {/* Makes the icon smaller */}
-                </IconButton>
-              </Tooltip>
-            )}
-            <div style={{ width: "8px" }}></div>{" "}
-            {isCollapsed && (
-              <Tooltip title="Edit image parameters">
-                <IconButton color="secondary" size="small" onClick={null}>
-                  <Settings fontSize="small" />
-                </IconButton>
-              </Tooltip>
-            )}
-          </div>
+          <IconGroup
+            isCollapsed={isCollapsed}
+            handleEditClick={handleEditClick}
+            handleReset={handleReset}
+            isDeletable={isDeletable}
+            showDeleteDialog={showDeleteDialog}
+            handleMouseEnter={handleMouseEnter}
+            handleMouseLeave={handleMouseLeave}
+            getRotationStyle={getRotationStyle}
+          />
         </Grid>
 
         <DeleteDialog
