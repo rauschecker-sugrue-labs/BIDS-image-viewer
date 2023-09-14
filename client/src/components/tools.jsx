@@ -189,7 +189,11 @@ export function DropdownContainer({
           </Grid>
         </Collapse>
         <Grid container justifyContent="space-between" alignItems="center">
-          {isCollapsed && <i>{getShortName(imagePath)}</i>}
+          {isCollapsed && (
+            <Tooltip title={getShortName(imagePath)}>
+              <i style={filePathStyle}>{getShortName(imagePath)}</i>
+            </Tooltip>
+          )}
           <div style={iconGroupStyle}>
             {isCollapsed && (
               <Tooltip title="Edit choices">
@@ -284,3 +288,11 @@ function getShortName(path) {
   const [prefix, suffix] = splitString(shortName);
   return suffix;
 }
+
+const filePathStyle = {
+  fontSize: "small", // Smaller font size
+  whiteSpace: "nowrap", // Prevents the text from wrapping into next line
+  overflow: "hidden", // Hide the overflow text
+  textOverflow: "ellipsis", // Show ellipsis when text overflows
+  maxWidth: "60%", // You can specify a max-width to prevent it from taking full space
+};
