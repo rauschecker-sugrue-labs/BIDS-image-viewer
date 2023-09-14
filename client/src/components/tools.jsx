@@ -9,11 +9,6 @@ import {
   MenuItem,
   IconButton,
   Button,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogContentText,
-  DialogTitle,
   Collapse,
   Tooltip,
 } from "@mui/material";
@@ -28,6 +23,7 @@ import { useTheme } from "@mui/material/styles";
 
 import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
 import VisibilityIcon from "@mui/icons-material/Visibility";
+import { ConfirmDialog } from "./Dialogs";
 import "../App.css";
 
 export function DropdownContainer({
@@ -241,22 +237,11 @@ export function DropdownContainer({
           </div>
         </Grid>
 
-        <Dialog open={openDialog} onClose={handleClose}>
-          <DialogTitle>Confirm Delete</DialogTitle>
-          <DialogContent>
-            <DialogContentText>
-              Are you sure you want to delete this layer?
-            </DialogContentText>
-          </DialogContent>
-          <DialogActions>
-            <Button onClick={handleClose} color="primary">
-              Cancel
-            </Button>
-            <Button onClick={handleConfirmDelete} color="secondary">
-              Confirm
-            </Button>
-          </DialogActions>
-        </Dialog>
+        <ConfirmDialog
+          open={openDialog}
+          handleClose={handleClose}
+          handleConfirm={handleConfirmDelete}
+        />
       </Paper>
     </Container>
   );
