@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { IconButton, Tooltip, Popover, Slider } from "@mui/material";
+import { IconButton, Tooltip, Popover, Slider, Box } from "@mui/material";
 import {
   RestartAlt,
   DeleteOutlined as DelIcon,
@@ -113,21 +113,33 @@ export default function IconGroup({
               vertical: "bottom",
               horizontal: "center",
             }}
+            slotProps={{ paper: { style: { width: "300px" } } }}
           >
-            <div style={{ padding: theme.spacing(5) }}>
-              <FiberColorDropdown onChange={(value) => onFiberColorChange(value)} />
-
-              <RangeSlider
-                title="Tracto clip"
-                descriptionTip="Adjust how far from the plane of view the tracts are clipped."
-                onChange={(value) => {
-                  setSliderValue(value);
-                  onClipValueChange(value);
-                }}
-                min={0}
-                max={50}
-                value={sliderValue}
-              />
+            <div style={{ padding: theme.spacing(3) }}>
+              <Box
+                display="flex"
+                flexDirection="column"
+                justifyContent="center"
+                alignItems="center"
+                spacing={3}
+              >
+                <Box width={1}>
+                  <FiberColorDropdown onChange={(value) => onFiberColorChange(value)} />
+                </Box>
+                <Box width={1}>
+                  <RangeSlider
+                    title="Tracto clip"
+                    descriptionTip="Adjust how far from the plane of view the tracts are clipped."
+                    onChange={(value) => {
+                      setSliderValue(value);
+                      onClipValueChange(value);
+                    }}
+                    min={0}
+                    max={50}
+                    value={sliderValue}
+                  />
+                </Box>
+              </Box>
             </div>
           </Popover>
         </>

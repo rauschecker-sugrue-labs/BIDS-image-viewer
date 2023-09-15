@@ -8,7 +8,9 @@ import {
   MenuItem,
   FormControl,
   InputLabel,
+  FormLabel,
 } from "@mui/material";
+import { useTheme } from "@mui/material/styles";
 
 export function FiberColorDropdown({ onChange }) {
   const [selectedValue, setSelectedValue] = React.useState("");
@@ -20,23 +22,25 @@ export function FiberColorDropdown({ onChange }) {
   };
 
   return (
-    <FormControl fullWidth variant="outlined">
-      <InputLabel id="fiberColor-label">Fiber Color</InputLabel>
-      <Select
-        labelId="fiberColor-label"
-        id="fiberColor"
-        value={selectedValue}
-        onChange={handleChange}
-        label="Fiber Color"
-      >
-        <MenuItem value="Global">Global direction</MenuItem>
-        <MenuItem value="Local">Local direction</MenuItem>
-        <MenuItem value="Fixed">Fixed</MenuItem>
-        <MenuItem value="DPG0">First Group (if available)</MenuItem>
-        <MenuItem value="DPG1">Second Group (if available)</MenuItem>
-        <MenuItem value="DPG01">Both Groups (if available)</MenuItem>
-      </Select>
-    </FormControl>
+    <Box mt={2}>
+      <FormLabel component="legend">Fiber Color</FormLabel>
+      <FormControl fullWidth variant="standard">
+        <Select
+          labelId="fiberColor-label"
+          id="fiberColor"
+          value={selectedValue}
+          onChange={handleChange}
+          label="Fiber Color"
+        >
+          <MenuItem value="Global">Global direction</MenuItem>
+          <MenuItem value="Local">Local direction</MenuItem>
+          <MenuItem value="Fixed">Fixed</MenuItem>
+          <MenuItem value="DPG0">First Group (if available)</MenuItem>
+          <MenuItem value="DPG1">Second Group (if available)</MenuItem>
+          <MenuItem value="DPG01">Both Groups (if available)</MenuItem>
+        </Select>
+      </FormControl>
+    </Box>
   );
 }
 
@@ -49,12 +53,11 @@ export function RangeSlider({
   step,
   value,
 }) {
+  const theme = useTheme();
   return (
-    <Box sx={{ width: 200 }}>
+    <Box mt={2}>
       <Tooltip title={descriptionTip}>
-        <Typography id="range-slider" gutterBottom>
-          {title}
-        </Typography>
+        <FormLabel component="legend">{title}</FormLabel>
       </Tooltip>
       <Slider
         value={value}
