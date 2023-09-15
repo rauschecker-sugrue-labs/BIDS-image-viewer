@@ -3,6 +3,7 @@ import { Niivue } from "@niivue/niivue";
 
 const NiiVue = ({ imageUrls }) => {
   const canvas = useRef();
+  const nv = useRef(new Niivue());
 
   useEffect(() => {
     const supportedExt = {
@@ -28,11 +29,10 @@ const NiiVue = ({ imageUrls }) => {
     });
 
     const loadResourcesAndSetSliceType = async () => {
-      const nv = new Niivue();
-      nv.attachToCanvas(canvas.current);
-      nv.loadVolumes(volumeList);
-      await nv.loadMeshes(meshList); // Await completion before moving on
-      nv.setSliceType(nv.sliceTypeMultiplanar);
+      nv.current.attachToCanvas(canvas.current);
+      nv.current.loadVolumes(volumeList);
+      await nv.current.loadMeshes(meshList); // Await completion before moving on
+      nv.current.setSliceType(nv.current.sliceTypeMultiplanar);
     };
 
     loadResourcesAndSetSliceType();
