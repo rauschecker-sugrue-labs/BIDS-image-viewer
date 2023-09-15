@@ -12,7 +12,6 @@ import {
 import { DeleteDialog } from "./Dialogs";
 import IconGroup from "./IconGroup";
 import "../App.css";
-import { FiberColorDropdown } from "./NiivueComponents";
 
 export function DropdownContainer({
   dataDict,
@@ -161,12 +160,9 @@ export function DropdownContainer({
         </Collapse>
         <Grid container justifyContent="space-between" alignItems="center">
           {isCollapsed && (
-            <>
-              <Tooltip title={getShortName(imagePath)}>
-                <i style={filePathStyle}>{getShortName(imagePath)}</i>
-              </Tooltip>
-              <FiberColorDropdown onChange={(value) => onFiberColorChange(value)} />
-            </>
+            <Tooltip title={getShortName(imagePath)}>
+              <i style={filePathStyle}>{getShortName(imagePath)}</i>
+            </Tooltip>
           )}
           <IconGroup
             isCollapsed={isCollapsed}
@@ -177,6 +173,7 @@ export function DropdownContainer({
             handleMouseEnter={handleMouseEnter}
             handleMouseLeave={handleMouseLeave}
             getRotationStyle={getRotationStyle}
+            onFiberColorChange={onFiberColorChange}
             onClipValueChange={onClipValueChange}
           />
         </Grid>

@@ -9,7 +9,7 @@ import {
   Visibility,
 } from "@mui/icons-material";
 import { useTheme } from "@mui/material/styles";
-import { RangeSlider } from "./NiivueComponents";
+import { FiberColorDropdown, RangeSlider } from "./NiivueComponents";
 
 export default function IconGroup({
   isCollapsed,
@@ -20,6 +20,7 @@ export default function IconGroup({
   handleMouseEnter,
   handleMouseLeave,
   getRotationStyle,
+  onFiberColorChange,
   onClipValueChange,
 }) {
   const theme = useTheme();
@@ -114,6 +115,8 @@ export default function IconGroup({
             }}
           >
             <div style={{ padding: theme.spacing(5) }}>
+              <FiberColorDropdown onChange={(value) => onFiberColorChange(value)} />
+
               <RangeSlider
                 title="Tracto clip"
                 descriptionTip="Adjust how far from the plane of view the tracts are clipped."

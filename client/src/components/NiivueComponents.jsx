@@ -1,16 +1,42 @@
 import React, { useEffect, useRef, useState } from "react";
-import { Slider, Box, Typography, Tooltip } from "@mui/material";
+import {
+  Slider,
+  Box,
+  Typography,
+  Tooltip,
+  Select,
+  MenuItem,
+  FormControl,
+  InputLabel,
+} from "@mui/material";
 
 export function FiberColorDropdown({ onChange }) {
+  const [selectedValue, setSelectedValue] = React.useState("");
+
+  const handleChange = (event) => {
+    const value = event.target.value;
+    setSelectedValue(value);
+    onChange(value);
+  };
+
   return (
-    <select onChange={(e) => onChange(e.target.value)} id="fiberColor">
-      <option value="Global">Global direction</option>
-      <option value="Local">Local direction</option>
-      <option value="Fixed">Fixed</option>
-      <option value="DPG0">First Group (if available)</option>
-      <option value="DPG1">Second Group (if available)</option>
-      <option value="DPG01">Both Groups (if available)</option>
-    </select>
+    <FormControl fullWidth variant="outlined">
+      <InputLabel id="fiberColor-label">Fiber Color</InputLabel>
+      <Select
+        labelId="fiberColor-label"
+        id="fiberColor"
+        value={selectedValue}
+        onChange={handleChange}
+        label="Fiber Color"
+      >
+        <MenuItem value="Global">Global direction</MenuItem>
+        <MenuItem value="Local">Local direction</MenuItem>
+        <MenuItem value="Fixed">Fixed</MenuItem>
+        <MenuItem value="DPG0">First Group (if available)</MenuItem>
+        <MenuItem value="DPG1">Second Group (if available)</MenuItem>
+        <MenuItem value="DPG01">Both Groups (if available)</MenuItem>
+      </Select>
+    </FormControl>
   );
 }
 
