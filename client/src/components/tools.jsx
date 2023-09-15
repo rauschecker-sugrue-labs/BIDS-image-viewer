@@ -21,6 +21,7 @@ export function DropdownContainer({
   isDeletable,
   imagePath,
   onFiberColorChange,
+  onClipValueChange,
 }) {
   const [selections, setSelections] = useState({});
   const [isCollapsed, setIsCollapsed] = useState(imagePath !== null);
@@ -176,6 +177,7 @@ export function DropdownContainer({
             handleMouseEnter={handleMouseEnter}
             handleMouseLeave={handleMouseLeave}
             getRotationStyle={getRotationStyle}
+            onClipValueChange={onClipValueChange}
           />
         </Grid>
 

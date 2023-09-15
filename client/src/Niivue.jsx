@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import { Niivue } from "@niivue/niivue";
 
-const NiiVue = ({ imageUrls, fiberColor }) => {
+const NiiVue = ({ imageUrls, fiberColor, clipValue }) => {
   const canvas = useRef();
   const nv = useRef(new Niivue());
   const [meshesLoaded, setMeshesLoaded] = useState(false);
@@ -34,6 +34,7 @@ const NiiVue = ({ imageUrls, fiberColor }) => {
       nv.current.attachToCanvas(canvas.current);
       nv.current.loadVolumes(volumeList);
       await nv.current.loadMeshes(meshList); // Await completion before moving on
+      nv.current.setMeshThicknessOn2D(clipValue);
       nv.current.setSliceType(nv.current.sliceTypeMultiplanar);
       setMeshesLoaded(true);
     };
