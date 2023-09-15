@@ -54,6 +54,7 @@ export function CollapsibleMenu({ onAddLayerClick, toggleTheme, theme }) {
         </Toolbar>
       </AppBar>
       <Drawer anchor="left" open={menuOpen} onClose={handleToggle}>
+        <Toolbar />
         <Button
           variant="contained"
           color="primary"

@@ -6,7 +6,7 @@ import { CollapsibleMenu } from "./components/CollapsibleMenu";
 import { DropdownContainer, getInitialSelections } from "./components/tools";
 import CssBaseline from "@mui/material/CssBaseline";
 import { createTheme, ThemeProvider, useTheme } from "@mui/material/styles";
-import Box from "@mui/material/Box";
+import { Box } from "@mui/material";
 import useMediaQuery from "@mui/material/useMediaQuery";
 
 import NiiVue from "./Niivue";
@@ -19,13 +19,8 @@ function App() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [layers, setLayers] = useState([]);
   const [imageUrls, setImageUrls] = useState([]);
-  const [volumeList, setVolumeList] = useState([]);
-  const [meshList, setMeshList] = useState([]);
   const [ids, setIds] = useState({});
   const [globalId, setGlobalId] = useState({ subject: null, session: null });
-  const [lastSuccessfulSelection, setLastSuccessfulSelection] = useState({});
-  const [lastSuccessfulLayerSelection, setLastSuccessfulLayerSelection] = useState({});
-  const [wasPathValid, setWasPathValid] = useState(false);
   const [showErrorMessage, setShowErrorMessage] = useState(false);
 
   // ************** Debugging **************  \\
@@ -181,32 +176,6 @@ function App() {
     newImageUrls.splice(layerIndex, 1);
     setImageUrls(newImageUrls);
   };
-  useEffect(() => {
-    console.log("imageUrls updated:", imageUrls);
-    const newVolumeList = [];
-    const newMeshList = [];
-
-    imageUrls.forEach((url, index) => {
-      const ext = url.substring(url.lastIndexOf(".")); // Get the file extension
-      const fullExt = "." + url.split(".").slice(-2).join("."); // Get the full extension for cases like '.nii.gz'
-      console.debug("ext: ", ext);
-      console.debug("fullext: ", fullExt);
-      if (supportedExt.volume.includes(ext) || supportedExt.volume.includes(fullExt)) {
-        newVolumeList.push({ url });
-      } else if (
-        supportedExt.mesh.includes(ext) ||
-        supportedExt.mesh.includes(fullExt)
-      ) {
-        newMeshList.push({ url });
-      }
-    });
-
-    setVolumeList(newVolumeList);
-    setMeshList(newMeshList);
-    console.log("volumes updated: ", newVolumeList);
-    console.log("meshes updated: ", newMeshList);
-    console.log(layers);
-  }, [imageUrls]);
 
   // ************** Rendering **************  \\
   const [isManualOverride, setIsManualOverride] = useState(false);
@@ -220,6 +189,7 @@ function App() {
   // Listen for system color scheme changes
   useEffect(() => {
     if (!isManualOverride) {
+      //FIXME: doesn't change the theme when the system theme changes
       const systemTheme = window.matchMedia("(prefers-color-scheme: dark)").matches
         ? "dark"
         : "light";
@@ -250,6 +220,7 @@ function App() {
                   dataDict={ids}
                   onSelectionChange={(newIds, type) => handleGlobalChange(newIds, type)}
                   isDeletable={false}
+                  imagePath={null}
                 />
                 {/* Add layer containers */}
                 {layers.length > 0 &&
@@ -262,10 +233,11 @@ function App() {
                       }
                       onDelete={() => handleDeleteLayer(index)}
                       isDeletable={true}
+                      imagePath={layer.imageUrl}
                     />
                   ))}
               </Box>
-              <Box className="niivue-container" flexGrow={1} minHeight="300px">
+              <Box className="niivue-container" minHeight="300px">
                 {layers.map((layer) => layer.imageUrl).filter(Boolean).length > 0 ? (
                   <NiiVue
                     imageUrls={layers.map((layer) => layer.imageUrl).filter(Boolean)}

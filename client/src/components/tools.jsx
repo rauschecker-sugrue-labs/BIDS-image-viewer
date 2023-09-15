@@ -6,19 +6,11 @@ import {
   FormControl,
   InputLabel,
   Select,
-  MenuItem,
-  IconButton,
-  Button,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogContentText,
-  DialogTitle,
+  Collapse,
+  Tooltip,
 } from "@mui/material";
-
-import { RestartAlt, DeleteOutlined as DelIcon } from "@mui/icons-material";
-import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
-import VisibilityIcon from "@mui/icons-material/Visibility";
+import { DeleteDialog } from "./Dialogs";
+import IconGroup from "./IconGroup";
 import "../App.css";
 
 export function DropdownContainer({
@@ -26,8 +18,15 @@ export function DropdownContainer({
   onSelectionChange,
   onDelete,
   isDeletable,
+  imagePath,
 }) {
   const [selections, setSelections] = useState({});
+  const [isCollapsed, setIsCollapsed] = useState(imagePath !== null);
+  useEffect(() => {
+    if (imagePath !== null) {
+      setIsCollapsed(true);
+    }
+  }, [imagePath]);
 
   const handleChange = (key, event) => {
     const value = event.target.value;
@@ -47,6 +46,7 @@ export function DropdownContainer({
     setTimeout(() => {
       setClickRotate(false);
     }, 400);
+    setIsCollapsed(false);
   };
 
   const renderOptions = (options) => {
@@ -101,6 +101,9 @@ export function DropdownContainer({
     if (hoverRotate) return "rotate(30deg)";
     return "rotate(0deg)";
   };
+  const handleEditClick = () => {
+    setIsCollapsed(!isCollapsed);
+  };
   const handleDelete = () => {
     if (onDelete) {
       onDelete();
@@ -118,9 +121,10 @@ export function DropdownContainer({
     setOpenDialog(false);
   };
 
-  const showConfirmDialog = () => {
+  const showDeleteDialog = () => {
     setOpenDialog(true);
   };
+
   const gridSize = Object.keys(dataDict).length === 2 ? 6 : 3;
   return (
     <Container>
@@ -128,80 +132,53 @@ export function DropdownContainer({
         elevation={3}
         style={{ padding: "20px", marginTop: "20px", position: "relative" }}
       >
-        <Grid container spacing={3}>
-          {sortKeysByCustomOrder(Object.keys(dataDict)).map((key) => (
-            <Grid item xs={6} sm={gridSize} md={6} key={key}>
-              <FormControl variant="outlined" fullWidth>
-                <InputLabel htmlFor={key}>{key}</InputLabel>
-                <Select
-                  native
-                  value={selections[key] || ""}
-                  onChange={(e) => handleChange(key, e)}
-                  label={key}
-                  inputProps={{
-                    name: key,
-                    id: key,
-                  }}
-                >
-                  <option aria-label="None" value="" />
-                  {renderOptions(dataDict[key])}
-                </Select>
-              </FormControl>
-            </Grid>
-          ))}
-        </Grid>
-        <Dialog open={openDialog} onClose={handleClose}>
-          <DialogTitle>Confirm Delete</DialogTitle>
-          <DialogContent>
-            <DialogContentText>
-              Are you sure you want to delete this layer?
-            </DialogContentText>
-          </DialogContent>
-          <DialogActions>
-            <Button onClick={handleClose} color="primary">
-              Cancel
-            </Button>
-            <Button onClick={handleConfirmDelete} color="secondary">
-              Confirm
-            </Button>
-          </DialogActions>
-        </Dialog>
-        <div
-          style={{
-            position: "absolute",
-            top: "-10px",
-            right: "-10px",
-            background: "white",
-            borderRadius: "10%",
-            padding: "5px",
-            boxShadow: "0px 0px 5px rgba(0,0,0,0.2)",
-          }}
-        >
-          <IconButton
-            color="primary"
-            aria-label="reset"
-            size="small" // Makes the button smaller
-            onClick={handleReset}
-            onMouseEnter={handleMouseEnter}
-            onMouseLeave={handleMouseLeave}
-            style={{
-              transition: "transform 0.5s ease",
-              transform: getRotationStyle(),
-            }}
-          >
-            <RestartAlt fontSize="small" /> {/* Makes the icon smaller */}
-          </IconButton>
-          {isDeletable && (
-            <IconButton
-              color="primary"
-              aria-label="delete"
-              size="small" // Makes the button smaller
-              onClick={showConfirmDialog}
-            >
-              <DelIcon fontSize="small" /> {/* Makes the icon smaller */}
-            </IconButton>
+        <Collapse in={!isCollapsed} timeout={"auto"}>
+          <Grid container spacing={3}>
+            {sortKeysByCustomOrder(Object.keys(dataDict)).map((key) => (
+              <Grid item xs={6} sm={gridSize} md={6} key={key}>
+                <FormControl variant="outlined" fullWidth>
+                  <InputLabel htmlFor={key}>{key}</InputLabel>
+                  <Select
+                    native
+                    value={selections[key] || ""}
+                    onChange={(e) => handleChange(key, e)}
+                    label={key}
+                    inputProps={{
+                      name: key,
+                      id: key,
+                    }}
+                  >
+                    <option aria-label="None" value="" />
+                    {renderOptions(dataDict[key])}
+                  </Select>
+                </FormControl>
+              </Grid>
+            ))}
+          </Grid>
+        </Collapse>
+        <Grid container justifyContent="space-between" alignItems="center">
+          {isCollapsed && (
+            <Tooltip title={getShortName(imagePath)}>
+              <i style={filePathStyle}>{getShortName(imagePath)}</i>
+            </Tooltip>
           )}
-        </div>
+          <IconGroup
+            isCollapsed={isCollapsed}
+            handleEditClick={handleEditClick}
+            handleReset={handleReset}
+            isDeletable={isDeletable}
+            showDeleteDialog={showDeleteDialog}
+            handleMouseEnter={handleMouseEnter}
+            handleMouseLeave={handleMouseLeave}
+            getRotationStyle={getRotationStyle}
+          />
+        </Grid>
+
+        <DeleteDialog
+          open={openDialog}
+          handleClose={handleClose}
+          handleConfirm={handleConfirmDelete}
+        />
       </Paper>
     </Container>
   );
@@ -211,4 +188,44 @@ export const getInitialSelections = (dataDict) => {
   return Object.keys(dataDict).reduce((acc, key) => {
     return { ...acc, [key]: "" };
   }, {});
+};
+
+function getFileName(path) {
+  return path.split(/[/\\]/).pop();
+}
+
+function splitString(str) {
+  const runMatch = str.match(/run-\w+_/);
+  const sesMatch = str.match(/ses-\w+_/);
+  const subMatch = str.match(/sub-\w+_/);
+
+  let splitPoint;
+
+  if (runMatch) {
+    splitPoint = runMatch.index + runMatch[0].length;
+  } else if (sesMatch) {
+    splitPoint = sesMatch.index + sesMatch[0].length;
+  } else if (subMatch) {
+    splitPoint = subMatch.index + subMatch[0].length;
+  }
+
+  if (splitPoint !== undefined) {
+    return [str.substring(0, splitPoint), str.substring(splitPoint)];
+  }
+
+  return [str];
+}
+
+function getShortName(path) {
+  const shortName = getFileName(path);
+  const [prefix, suffix] = splitString(shortName);
+  return suffix;
+}
+
+const filePathStyle = {
+  fontSize: "small", // Smaller font size
+  whiteSpace: "nowrap", // Prevents the text from wrapping into next line
+  overflow: "hidden", // Hide the overflow text
+  textOverflow: "ellipsis", // Show ellipsis when text overflows
+  maxWidth: "60%", // You can specify a max-width to prevent it from taking full space
 };
