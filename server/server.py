@@ -1,41 +1,17 @@
-from flask import Flask, jsonify, send_file, request
+from flask import Flask, jsonify, send_file, request, send_from_directory
 from pathlib import Path
+import os
 import json
 from config import Config
 import file_handling as fh
 
-app = Flask(__name__)
+app = Flask(__name__, static_folder="../client/build")
 app.config.from_object(Config)
 
 ROOTDIR = app.config["ROOTDIR"]
 port = app.config["PORT"]
 # Call this on server launch
 LAYOUT = fh.get_layout(ROOTDIR)
-
-
-def update_subjects_and_sessions():
-    derivatives_path = ROOTDIR / "derivatives/mproc"
-    subjects = []
-    sessions = set()
-
-    for subject_dir in derivatives_path.iterdir():
-        if subject_dir.name.startswith("sub-NDARINV"):
-            subject_id = subject_dir.name.replace("sub-", "")
-            subjects.append(subject_id)
-
-            # Get the sessions for this subject
-            for session_dir in subject_dir.iterdir():
-                if session_dir.name.startswith("ses-"):
-                    sessions.add(session_dir.name.replace("ses-", ""))
-
-    with open(ROOTDIR / "dataDict.json") as f:
-        data = json.load(f)
-
-    data["subject"] = subjects
-    data["session"] = list(sessions)
-
-    with open(ROOTDIR / "dataDict.json", "w") as f:
-        json.dump(data, f, indent=2)
 
 
 @app.route("/subjects")
@@ -94,7 +70,14 @@ def get_file(file_path):
         return "File not found", 404
 
 
-# You can add the route to get available files similar to what we discussed earlier
+@app.route("/", defaults={"path": ""})
+@app.route("/<path:path>")
+def serve(path):
+    if path != "" and os.path.exists(app.static_folder + "/" + path):
+        return send_from_directory(app.static_folder, path)
+    else:
+        return send_from_directory(app.static_folder, "index.html")
+
 
 if __name__ == "__main__":
     app.run(port=port, debug=True)
