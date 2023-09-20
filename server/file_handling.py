@@ -23,9 +23,7 @@ def get_layout(root_dir: Path) -> BIDSLayout:
     """
     try:
         add_config_paths(
-            **{
-                "bidsafq": "/Users/pierre/Documents/code/viewer-app/my-app/server/bids.json"  # noqa: E501
-            }
+            **{"bidsafq": Path(__file__).parent / "bids.json"}  # noqa: E501
         )
     except ConfigError as e:
         print(e)
@@ -131,3 +129,40 @@ def parse_bids_data_attributes(layout: BIDSLayout, kwargs: dict = {}):
     result_dict = {k: v for k, v in result_dict.items() if k not in to_drop}
     return result_dict
 
+
+# %% create object?
+# root_dir = Path("/Users/pierre/Documents/code/viewer-app/data/abcd2")
+# layout = get_layout(root_dir)
+# data = {"subject": "NDARINVJ1EAYRFN", "session": "baselineYear1Arm1", "suffix": "T1w"}
+# get_fp(layout, data)
+# parse_bids_data_attributes(layout, data)
+# %%
+
+# entities = layout.get_entities()
+# big_path = "".join(layout.get(return_type="filename", absolute_paths=False))
+# import re
+
+# # [ent for ent, p in entities.items() if re.findall(re.compile(p.pattern), big_path)]
+# for ent, p in entities.items():
+#     try:
+#         rex = re.compile(p.pattern)
+#     except:
+#         print(ent)
+
+
+# rex = re.compile(entities['desc'].pattern)
+# re.findall(rex, big_path)
+
+# params = {
+#     "subject": layout.get_subject()[0],
+#     "session": layout.get_sessions()[0],
+#     "extension": "trx",
+#     # "return_type": "filename",
+#     # "suffix": "tractography",
+#     # "algorithm": "AFQ",
+# }
+# get_fp(layout, params)
+# parse_bids_data_attributes(layout, params)
+# get_fp(layout, params)
+
+# %%

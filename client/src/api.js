@@ -1,4 +1,6 @@
 import axios from "axios";
+import { API_URL } from "./apiConfig";
+axios.defaults.baseURL = API_URL;
 
 const apiCall = (apiFunc) => {
   return apiFunc()
@@ -10,17 +12,17 @@ const apiCall = (apiFunc) => {
 };
 
 export const getSubjectsSessions = () => {
-  return apiCall(() => axios.get("/get-subjects-sessions"));
+  return apiCall(() => axios.get("/api/get-subjects-sessions"));
 };
 
 export const getFields = () => {
-  return apiCall(() => axios.get("/get-fields"));
+  return apiCall(() => axios.get("/api/get-fields"));
 };
 
 export const updateFields = (params) => {
-  return apiCall(() => axios.post("/update-fields", params));
+  return apiCall(() => axios.post("/api/update-fields", params));
 };
 
 export const getPath = (params) => {
-  return apiCall(() => axios.post("/get-image-path", params));
+  return apiCall(() => axios.post("/api/get-image-path", params));
 };
