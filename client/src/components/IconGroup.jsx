@@ -1,5 +1,5 @@
-import React from "react";
-import { IconButton, Tooltip } from "@mui/material";
+import React, { useState } from "react";
+import { IconButton, Tooltip, Popover, Slider, Box } from "@mui/material";
 import {
   RestartAlt,
   DeleteOutlined as DelIcon,
@@ -9,6 +9,7 @@ import {
   Visibility,
 } from "@mui/icons-material";
 import { useTheme } from "@mui/material/styles";
+import { FiberColorDropdown, RangeSlider } from "./NiivueComponents";
 
 export default function IconGroup({
   isCollapsed,
@@ -19,6 +20,8 @@ export default function IconGroup({
   handleMouseEnter,
   handleMouseLeave,
   getRotationStyle,
+  onFiberColorChange,
+  onClipValueChange,
 }) {
   const theme = useTheme();
   const iconGroupStyle = isCollapsed
@@ -36,6 +39,21 @@ export default function IconGroup({
         padding: "5px",
         boxShadow: "0px 0px 5px rgba(0,0,0,0.2)",
       };
+
+  // ********** Settings popover ********** \\
+  const [anchorEl, setAnchorEl] = useState(null);
+
+  const handleSettingsClick = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleSettingsClose = () => {
+    setAnchorEl(null);
+  };
+
+  const open = Boolean(anchorEl);
+  const id = open ? "simple-popover" : undefined;
+  const [sliderValue, setSliderValue] = useState(5);
 
   return (
     <div style={iconGroupStyle}>
@@ -76,11 +94,55 @@ export default function IconGroup({
       )}
       <div style={{ width: "8px" }}></div>{" "}
       {isCollapsed && (
-        <Tooltip title="Edit image parameters">
-          <IconButton color="secondary" size="small" onClick={null}>
-            <Settings fontSize="small" />
-          </IconButton>
-        </Tooltip>
+        <>
+          <Tooltip title="Edit image parameters">
+            <IconButton color="secondary" size="small" onClick={handleSettingsClick}>
+              <Settings fontSize="small" />
+            </IconButton>
+          </Tooltip>
+          <Popover
+            id={id}
+            open={open}
+            anchorEl={anchorEl}
+            onClose={handleSettingsClose}
+            anchorOrigin={{
+              vertical: "top",
+              horizontal: "center",
+            }}
+            transformOrigin={{
+              vertical: "bottom",
+              horizontal: "center",
+            }}
+            slotProps={{ paper: { style: { width: "300px" } } }}
+          >
+            <div style={{ padding: theme.spacing(3) }}>
+              <Box
+                display="flex"
+                flexDirection="column"
+                justifyContent="center"
+                alignItems="center"
+                spacing={3}
+              >
+                <Box width={1}>
+                  <FiberColorDropdown onChange={(value) => onFiberColorChange(value)} />
+                </Box>
+                <Box width={1}>
+                  <RangeSlider
+                    title="Tracto clip"
+                    descriptionTip="Adjust how far from the plane of view the tracts are clipped."
+                    onChange={(value) => {
+                      setSliderValue(value);
+                      onClipValueChange(value);
+                    }}
+                    min={0}
+                    max={50}
+                    value={sliderValue}
+                  />
+                </Box>
+              </Box>
+            </div>
+          </Popover>
+        </>
       )}
     </div>
   );

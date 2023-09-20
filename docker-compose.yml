@@ -1,0 +1,20 @@
+version: "0.1"
+
+services:
+  server:
+    build: ./server
+    volumes:
+      - ${BIDSDIR}:/data/BIDS
+      - ./server:/app
+    environment:
+      - BIDSDIR=/data/BIDS
+      - REACT_APP_API_URL=http://server:3001
+    ports:
+      - "3001:3001"
+
+  client:
+    build: ./client
+    ports:
+      - "3000:80"
+    depends_on:
+      - server

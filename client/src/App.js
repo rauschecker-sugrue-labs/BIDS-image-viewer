@@ -22,6 +22,8 @@ function App() {
   const [ids, setIds] = useState({});
   const [globalId, setGlobalId] = useState({ subject: null, session: null });
   const [showErrorMessage, setShowErrorMessage] = useState(false);
+  const [fiberColor, setFiberColor] = useState("Global");
+  const [clipValue, setClipValue] = useState(5);
 
   // ************** Debugging **************  \\
   useEffect(() => {
@@ -234,6 +236,8 @@ function App() {
                       onDelete={() => handleDeleteLayer(index)}
                       isDeletable={true}
                       imagePath={layer.imageUrl}
+                      onFiberColorChange={setFiberColor}
+                      onClipValueChange={setClipValue}
                     />
                   ))}
               </Box>
@@ -241,6 +245,8 @@ function App() {
                 {layers.map((layer) => layer.imageUrl).filter(Boolean).length > 0 ? (
                   <NiiVue
                     imageUrls={layers.map((layer) => layer.imageUrl).filter(Boolean)}
+                    fiberColor={fiberColor}
+                    clipValue={clipValue}
                   />
                 ) : (
                   <p>Choose an image to load...</p>

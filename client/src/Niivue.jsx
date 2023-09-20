@@ -1,10 +1,13 @@
-import { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Niivue } from "@niivue/niivue";
 
-const NiiVue = ({ imageUrls }) => {
+const NiiVue = ({ imageUrls, fiberColor, clipValue }) => {
   const canvas = useRef();
+  const nv = useRef(new Niivue());
+  const [meshesLoaded, setMeshesLoaded] = useState(false);
 
   useEffect(() => {
+    setMeshesLoaded(false);
     const supportedExt = {
       volume: ["nii.gz", ".nii.gz", ".nii", ".gz"],
       mesh: [".trk", ".trx"],
@@ -28,15 +31,44 @@ const NiiVue = ({ imageUrls }) => {
     });
 
     const loadResourcesAndSetSliceType = async () => {
-      const nv = new Niivue();
-      nv.attachToCanvas(canvas.current);
-      nv.loadVolumes(volumeList);
-      await nv.loadMeshes(meshList); // Await completion before moving on
-      nv.setSliceType(nv.sliceTypeMultiplanar);
+      nv.current.attachToCanvas(canvas.current);
+      nv.current.loadVolumes(volumeList);
+      await nv.current.loadMeshes(meshList); // Await completion before moving on
+      nv.current.setMeshThicknessOn2D(clipValue);
+      nv.current.setSliceType(nv.current.sliceTypeMultiplanar);
+      setMeshesLoaded(true);
     };
 
     loadResourcesAndSetSliceType();
   }, [imageUrls]);
+
+  useEffect(() => {
+    if (!nv.current || !meshesLoaded) return;
+
+    // Handle fiber color change
+    // Ensure the mesh is loaded before trying to change properties
+    if (nv.current.meshes && nv.current.meshes[0]) {
+      switch (fiberColor) {
+        case "DPG0":
+          console.debug("DPG0");
+          // logic for DPG0
+          break;
+        case "DPG1":
+          console.debug("DPG1");
+          // logic for DPG1
+          break;
+        case "DPG01":
+          console.debug("DPG01");
+          // logic for DPG01
+          break;
+        default: // Will handle "Global", "Local", and "Fixed" or any other value
+          console.debug(`Setting fiber color to ${fiberColor}`);
+          nv.current.setMeshProperty(nv.current.meshes[0].id, "fiberColor", fiberColor);
+          console.debug(nv.current.meshes);
+          break;
+      }
+    }
+  }, [fiberColor, meshesLoaded]);
 
   return <canvas ref={canvas}></canvas>;
 };
