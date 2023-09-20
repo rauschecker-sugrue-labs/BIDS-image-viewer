@@ -1,5 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import { Niivue } from "@niivue/niivue";
+import { Tooltip, Typography, IconButton, Box, useTheme } from "@mui/material";
+import { HelpOutline } from "@mui/icons-material";
 
 const NiiVue = ({ imageUrls, fiberColor, clipValue }) => {
   const canvas = useRef();
@@ -70,7 +72,67 @@ const NiiVue = ({ imageUrls, fiberColor, clipValue }) => {
     }
   }, [fiberColor, meshesLoaded]);
 
-  return <canvas ref={canvas}></canvas>;
+  return (
+    <>
+      <canvas ref={canvas}></canvas>
+      <Tooltip
+        title={
+          <>
+            <KeyBox>C</KeyBox>
+            <Typography variant="body2" component="span">
+              Cycle Clip Plane
+            </Typography>
+            <br />
+            <KeyBox>V</KeyBox>
+            <Typography variant="body2" component="span">
+              Cycle Slice Type
+            </Typography>
+            <br />
+            <KeyBox>H</KeyBox>
+            <KeyBox>L</KeyBox>
+            <KeyBox>J</KeyBox>
+            <KeyBox>K</KeyBox>
+            <Typography variant="body2" component="span">
+              Rotation
+            </Typography>
+            <br />
+            <Typography variant="body2" component="span">
+              <b>Scroll</b>: Move Clip Plane or Zoom
+            </Typography>
+            <br />
+            <Typography variant="body2" component="span">
+              <b>Right Click</b>: Rotate Clip Plane
+            </Typography>
+            <br />
+            <Typography variant="body2" component="span">
+              <b>Left Click</b>: Rotate Camera
+            </Typography>
+          </>
+        }
+      >
+        <IconButton color="primary" size="small" aria-label="show controls">
+          <HelpOutline />
+        </IconButton>
+      </Tooltip>
+    </>
+  );
 };
 
+function KeyBox({ children }) {
+  const theme = useTheme();
+
+  return (
+    <Box
+      component="span"
+      bgcolor={theme.palette.background.paper}
+      border={`1px solid ${theme.palette.divider}`}
+      borderRadius="3px"
+      px={0.5}
+      mr={1}
+      color={theme.palette.text.primary}
+    >
+      {children}
+    </Box>
+  );
+}
 export default NiiVue;
