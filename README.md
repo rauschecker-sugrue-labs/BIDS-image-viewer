@@ -28,6 +28,7 @@ npm install
 # First terminal, in server/: running the server
 cd server/
 source .env/bin/activate
+export BIDSDIR=/path/to/bids/directory # replace with your bids directory
 python server.py
 # Second terminal, in client/: running the client
 npm start
@@ -42,7 +43,7 @@ git clone git@github.com:rauschecker-sugrue-labs/BIDS-image-viewer.git
 
 # within the root directory: this will install everything the first time,
 # and then run the app
-BIDS_DIR=/path/to/bids/directory docker-compose up
+BIDSDIR=/path/to/bids/directory docker-compose up
 
 # to force rebuild, add the --build flag at the end
 ```
