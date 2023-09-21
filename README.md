@@ -2,6 +2,14 @@
 
 Webapp to display images from a BIDS formatted directory, based on [Niivue](https://github.com/niivue/niivue).
 
+<table>
+<tr>
+<td><img src="https://github.com/rauschecker-sugrue-labs/BIDS-image-viewer/assets/65797646/7f0dafda-55b3-49d5-a62f-c62921653b0a" alt="image" width="600"/></td>
+<td><img src="https://github.com/rauschecker-sugrue-labs/BIDS-image-viewer/assets/65797646/39fede2d-81c8-4f08-9e8c-b31be2ed2fe1" alt="image" width="600"/></td>
+</tr>
+</table>
+
+
 ## Installation and usage
 
 This webviewer relies on the dataset being formatted according the [BIDS standard](https://bids.neuroimaging.io/), using [pybids](https://github.com/bids-standard/pybids) under the hood. If you need help formatting your dataset according to BIDS, please refer to the [BIDS starter kit](https://bids-standard.github.io/bids-starter-kit/).
