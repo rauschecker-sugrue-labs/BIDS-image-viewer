@@ -9,7 +9,6 @@ Webapp to display images from a BIDS formatted directory, based on [Niivue](http
 </tr>
 </table>
 
-
 ## Installation and usage
 
 This webviewer relies on the dataset being formatted according the [BIDS standard](https://bids.neuroimaging.io/), using [pybids](https://github.com/bids-standard/pybids) under the hood. If you need help formatting your dataset according to BIDS, please refer to the [BIDS starter kit](https://bids-standard.github.io/bids-starter-kit/).
@@ -36,13 +35,19 @@ npm install
 # First terminal, in server/: running the server
 cd server/
 source .env/bin/activate
-export BIDSDIR=/path/to/bids/directory # replace with your bids directory
+export BIDSDIR=/path/to/bids/directory # replace with your bids directory (*1)
 python server.py
 # Second terminal, in client/: running the client
 npm start
 ```
 
 Then navigate to http://localhost:3000.
+
+> **(\*1)** If you don't want to set the `BIDSDIR` environment variable everytime, you can also hardcode the path in [`server/config.py`](server/config.py#L6) like this:
+>
+> ```python
+> ROOTDIR = Path(os.environ.get("BIDSDIR", "CHANGE_HERE"))
+> ```
 
 ### Docker
 
