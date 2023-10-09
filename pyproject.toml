@@ -14,11 +14,11 @@ authors = [
 classifiers = [
   "Programming Language :: Python :: 3",
 ]
-dependencies = ["Flask", "pybids"]
+dependencies = ["Flask", "Flask-CORS", "pybids"]
 dynamic = ["version"]
 
 [project.urls]
-"Homepage" = "https://github.com/your/package"
+"Homepage" = "https://github.com/rauschecker-sugrue-labs/BIDS-image-viewer"
 
 [tool.hatch.version]
 source = "vcs"
