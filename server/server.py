@@ -7,13 +7,6 @@ from config import Config
 import file_handling as fh
 
 app = Flask(__name__, static_folder="../client/build")
-app.config.from_object(Config)
-CORS(app)
-
-ROOTDIR = app.config["ROOTDIR"]
-port = app.config["PORT"]
-# Call this on server launch
-LAYOUT = fh.get_layout(ROOTDIR)
 
 
 @app.route("/api/subjects")
@@ -83,4 +76,12 @@ def serve(path):
 
 
 if __name__ == "__main__":
+    app.config.from_object(Config)
+    CORS(app)
+
+    ROOTDIR = app.config["ROOTDIR"]
+    port = app.config["PORT"]
+    # Call this on server launch
+    LAYOUT = fh.get_layout(ROOTDIR)
+
     app.run(host="0.0.0.0", port=port, debug=True)
